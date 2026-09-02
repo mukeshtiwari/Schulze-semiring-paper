@@ -66,6 +66,109 @@ only \emph{commutativity}, over a plain semiring.
 \end{abstract}
 
 \section{Introduction}\label{sec:intro}
+The Schulze method~\cite{schulze2011new} ranks alternatives by
+\emph{beatpaths}. From a profile of ballots, one derives a matrix $M$ of
+pairwise link strengths. A chain $a = c_0, c_1, \dots, c_k = b$ is worth its
+weakest link, and alternative $a$ outranks $b$ when the best chain from $a$
+to $b$ beats the best chain from $b$ to $a$. Here best means $\max$ and
+worth means $\min$. The matrix of best chains is then exactly the Kleene
+star
+\[
+  \Mstar \;=\; I \oplus M \oplus M^{2} \oplus \cdots
+\]
+of $M$ over the semiring $\langle \mathbb{Z}^{\pm\infty}, \max, \min\rangle$.
+The method's output follows from the comparison
+\[
+  a \succ b \quad\text{iff}\quad \Mstar_{ba} < \Mstar_{ab}
+\]
+taken in that semiring's natural order.
+
+
+Now change the arithmetic,  from $\langle \mathbb{Z}^{\pm\infty}, \max, \min\rangle$ to $\langle \mathbb{N}^{\infty}, \min, +\rangle$, and keep everything else. Let a chain be worth the
+\emph{sum} of its links instead of the weakest, and let the best chain be the
+shortest one. Then $\Mstar$ holds shortest distances, and $a \succ b$ says
+that $a$ reaches $b$ more cheaply than $b$ reaches $a$. Only the two
+operations have moved, and three alternatives are already enough to make the
+method fail.
+
+\begin{example}[One profile, two semirings]\label{ex:tropical}
+Take three alternatives and three voters ranking them cyclically: one votes
+$a > b > c$, one votes $b > c > a$, and one votes $c > a > b$. Pairwise, $a$
+beats $b$ two votes to one, $b$ beats $c$ two to one, and $c$ beats $a$ two
+to one, so the majority relation is a cycle and there is no Condorcet
+winner. Every method built on pairwise comparisons must say something about
+this profile.
+
+Over $\langle \mathbb{Z}^{\pm\infty}, \max, \min\rangle$, let $M_{ij}$ be
+the number of voters ranking $i$ above $j$, with rows and columns indexed
+$a,b,c$ and the semiring zero on the diagonal:
+\[
+  M \;=\;
+  \begin{pmatrix}
+    -\infty & 2 & 1 \\
+    1 & -\infty & 2 \\
+    2 & 1 & -\infty
+  \end{pmatrix},
+  \qquad
+  \Mstar \;=\;
+  \begin{pmatrix}
+    \infty & 2 & 2 \\
+    2 & \infty & 2 \\
+    2 & 2 & \infty
+  \end{pmatrix}.
+\]
+The closure lifts every losing direction to the winning one. The direct link
+from $b$ to $a$ is worth only $1$, but the detour $b \to c \to a$ is worth
+$\min(2,2) = 2$, which matches the direct link from $a$ to $b$; the other
+two pairs behave the same way. No comparison $\Mstar_{ba} < \Mstar_{ab}$ is
+strict, $\succ$ is empty, and the method returns a three-way tie. The cycle
+in the ballots is flattened into indifference and all three alternatives
+survive as winners.
+
+Now keep the profile and change the semiring to $\langle \mathbb{N}^{\infty},
+\min, +\rangle$, reading a link as a cost rather than a strength and
+charging each link the opposition to it, $N_{ij} = M_{ji}$. Each hop along
+$a \to b \to c \to a$ then costs $1$ and each reverse hop costs $2$:
+\[
+  N \;=\;
+  \begin{pmatrix}
+    \infty & 1 & 2 \\
+    2 & \infty & 1 \\
+    1 & 2 & \infty
+  \end{pmatrix},
+  \qquad
+  N^{\ast} \;=\;
+  \begin{pmatrix}
+    0 & 1 & 2 \\
+    2 & 0 & 1 \\
+    1 & 2 & 0
+  \end{pmatrix}.
+\]
+This time the closure changes nothing off the diagonal. The detour
+$b \to c \to a$ costs $1 + 1 = 2$, no better than the direct hop back, and
+nowhere near the direct hop from $a$ to $b$ at cost $1$. So $a \succ b$, and
+by symmetry $b \succ c$ and $c \succ a$: the cycle survives the closure as a
+cycle of \emph{strict} wins, every alternative is beaten by another, and the
+winner set is empty.
+\end{example}
+
+The two halves of \Cref{ex:tropical} run the same ballots through the same
+construction and disagree completely. The guarantee that Schulze's
+method returns an ordering with a winner therefore does not come from the
+beatpath idea alone; it comes from $\max$ and $\min$. This is one 
+guarantee and Schulze's method has many
+others. Raising a candidate's support never harms it (monotonicity). A
+candidate who beats every other head to head is always elected (Condorcet
+consistency). Every winner comes from the smallest set of candidates that
+beats everyone outside it (the Smith criterion). And there are several more.
+
+It has long been known that the closure construction itself is generic:
+transitive closure, shortest paths, and widest paths are all instances of
+one algorithm run over different
+semirings~\cite{carre1971algebra,lehmann1977,10.5555/1386688,baras2022path}.
+To our knowledge, though, social choice theory has never been carried to
+that same level of generality. That is our subject.
+
 
 
 \subparagraph*{Our contributions.}
@@ -167,6 +270,7 @@ exactly the simple-path optimum the method prescribes. The truncation
 remains meaningful even without boundedness, and the one bare-semiring
 result, neutrality, is a statement about it.
 
+
 \section{Which Axiom Does Each Criterion Need?}
 
 \subsection{Level 0: Any Semiring}
@@ -175,9 +279,7 @@ result, neutrality, is a statement about it.
 
 \subsection{Level 2: Selectivity}
 
-\subsection{Level 3: Selectivity}
-
-\subsection{Level 4: Commutativity}
+\subsection{Level 3: Commutativity}
 
 
 \section{Technical Difficulty in Encdoing}
@@ -188,6 +290,7 @@ be expressed cleanly.
 \section{Formalisation Verification}
 
 \section{Related Work}\label{sec:related}
+
 
 \section{Conclusion}\label{sec:conclusion}
 
