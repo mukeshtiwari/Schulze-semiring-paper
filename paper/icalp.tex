@@ -13,7 +13,7 @@
 
 \titlerunning{Social Choice Theory in Semiring}
 
-%\author{First Author}{Institution, Country}{first@example.org}{}{}
+\author{First Author}{Institution, Country}{first@example.org}{}{}
 %\author{Second Author}{Institution, Country}{second@example.org}{}{}
 %\authorrunning{F. Author and S. Author}
 
@@ -40,12 +40,28 @@ social choice, interactive theorem proving}
 \maketitle
 
 \begin{abstract}
-The Schulze method is a widely used single-winner election method. One alternative beats 
+
+
+The Schulze method is a widely used single-winner election method rule based on \emph{beatpaths}. One alternative beats 
 another when the strongest path from one to the other is stronger than the strongest 
 path in the opposite direction. Since the strength of a path is determined by its weakest 
 link, this can be expressed using the Kleene star of a matrix over the 
-semiring \(\langle \mathbb{Z}^{\pm\infty}, \max, \min\rangle\). Thus, the main properties 
-of the Schulze method follow from the algebraic properties of this semiring. 
+semiring \(\langle \mathbb{Z}^{\pm\infty}, \max, \min\rangle\). 
+Schulze's guarantees, such as neutrality, monotonicity, pareto, etc.,  
+are therefore theorems about that semiring.
+
+We interpret those guarantees over an arbitrary semiring and ask: 
+for each guarantee, which algebraic axioms its proof consumes. 
+They sort into five levels. At
+the bottom is neutrality, which holds over any semiring at all. The Pareto
+condition and monotonicity are proved from \emph{boundedness} alone, that
+$1 + a = 1$. The Smith criterion and Condorcet consistency are proved from \emph{boundedness} together with \emph{selectivity},
+that $x+y$ is always $x$ or $y$, and each of them fails without selectivity.
+The criteria that compose two beatpaths use in addition a
+\emph{meet property}, that $a\cdot b$ is the greatest lower bound of $a$ and
+$b$. Reversal symmetry, in its relation-level form, is the outlier: it needs
+only \emph{commutativity}, over a plain semiring.
+
 
 \end{abstract}
 
@@ -55,7 +71,101 @@ of the Schulze method follow from the algebraic properties of this semiring.
 \subparagraph*{Our contributions.}
 
 \section{Background}\label{sec:prelim}
-Background on semiring and its extension to matrices
+\subsection{Semirings and the Natural Order}
+
+\begin{definition}[Semiring]
+A \emph{semiring} is a tuple $R = \langle R, +, \cdot\,, 0, 1\rangle$ where
+$\langle R,+,0\rangle$ is a commutative monoid, $\langle R,\cdot\,,1\rangle$ is
+a monoid, multiplication distributes over addition on both sides, and
+$0\cdot a = a \cdot 0 = 0$. It is \emph{idempotent} if $a+a=a$,
+\emph{commutative} if $\cdot$ is, and \emph{bounded} if $1 + a = 1$ for all
+$a$.
+\end{definition}
+
+Boundedness says $1$ absorbs $+$; it implies idempotence and is the standing
+assumption throughout. In the intended reading it is not a restriction but a
+fact: the empty path should be unbeatable.
+
+\begin{definition}[Natural order]
+For an idempotent semiring put $a \leq b \iff a+b=b$, and write $a<b$ for
+$a\leq b$ with $a \neq b$.
+\end{definition}
+
+\begin{lemma}\label{lem:natural}
+On an idempotent semiring the natural order is a partial order, $+$ is its
+join, and multiplication is monotone in both arguments. If $R$ is bounded then
+$0$ is least, $1$ is greatest, and $a\cdot b \leq a$ and $a\cdot b \leq b$.
+\end{lemma}
+
+\begin{proof}
+Reflexivity is the idempotence axiom itself, since $a \leq a$ unfolds to
+$a + a = a$. The proofs of transitivity, antisymmetry, and monotonicity are
+each a one-line rewrite; for transitivity, $a+b=b$ and $b+c=c$ give
+$a + c = a + (b + c) = (a+b) + c = b + c = c$, and the other two are
+similar. For the bounded clauses, $0+a=a$ and $1+a=1$ give the extremes,
+and $a\cdot b + a = a(b+1) = a$ gives $a\cdot b \leq a$, symmetrically on
+the other side.
+\end{proof}
+
+The last clause separates this setting from arbitrary semirings: here
+multiplication only loses strength. That is the right reading when a product
+is the worth of a composite chain, and it fails in
+$\langle \mathbb{N}, +, \times\rangle$, which is therefore out of scope.
+
+\begin{definition}[Selectivity, meet property]\label{def:sel-meet}
+$R$ is \emph{selective} if $x+y \in \{x,y\}$ for all $x,y$. It has the
+\emph{meet property} if $m \leq a$ and $m \leq b$ imply $m \leq a\cdot b$.
+\end{definition}
+
+Selectivity is exactly totality of the natural order, and with
+\Cref{lem:natural} the meet property says $a\cdot b$ is the greatest lower
+bound of $\{a,b\}$.
+
+\subsection{Matrices and the Kleene Star}
+
+\begin{definition}[Matrices and the star]
+Fix a finite set $A$ of alternatives, $|A| = n$. A \emph{matrix} over $R$
+assigns to every ordered pair of alternatives a strength, $M : A \times A
+\to R$, written $M_{ij}$. Matrices form a semiring under entrywise
+addition $(M\oplus N)_{ij} = M_{ij}+N_{ij}$ and the usual product
+$(M\otimes N)_{ij} = \sum_k M_{ik}\cdot N_{kj}$; the identity $I$ carries
+$1$ on the diagonal and $0$ elsewhere. The \emph{star} of $M$ is the
+series
+\[
+  \Mstar
+  \;=\; \bigoplus_{ 0 \leq k} M^{k}
+  \;=\; I \oplus M \oplus M^{2} \oplus \cdots .
+\]
+\end{definition}
+
+Entrywise, $(M^{k})_{ij}$ joins the worths of all walks of length exactly
+$k$ from $i$ to $j$, so $\Mstar_{ij}$ joins the worths of all walks from
+$i$ to $j$, of every length. In a general semiring this join is an
+infinite sum and need not exist; over $\langle \mathbb{N}, +,
+\times\rangle$ the powers simply grow.
+Boundedness is what brings the series to a fixed point. Over a bounded
+semiring, a walk of length $n$ or more revisits some vertex, and cutting
+out the cycle between the two visits leaves a shorter walk of at least the
+same worth, because products only lose strength (\Cref{lem:natural}).
+Every power beyond $M^{n-1}$ is therefore dominated by the earlier ones
+and adds nothing to the join. The series stabilises at stage $n-1$,
+\[
+  \Mstar \;=\; I \oplus M \oplus M^{2} \oplus \cdots \oplus M^{n-1}
+  \;=\; (M \oplus I)^{n-1},
+\]
+where the second equality uses idempotence: expanding $(M \oplus I)^{n-1}$
+by distributivity produces each $M^{k}$ many times over, and $a + a = a$
+merges the duplicates. The development takes this truncated sum as the
+definition of the closure. That is not a compromise but the
+standard definition in the algebraic path literature, where the closure
+over a suitably stable semiring is obtained at a finite
+power~\cite{carre1971algebra,lehmann1977}. The name is not merely conventional:
+the truncation satisfies $\Mstar = I \oplus (M \otimes \Mstar)$, the
+defining equation of the Kleene star for matrices, 
+and \Cref{sec:walks} shows it computes
+exactly the simple-path optimum the method prescribes. The truncation
+remains meaningful even without boundedness, and the one bare-semiring
+result, neutrality, is a statement about it.
 
 \section{Which Axiom Does Each Criterion Need?}
 
