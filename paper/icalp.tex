@@ -163,16 +163,42 @@ candidate who beats every other head to head is always elected (Condorcet
 consistency). Every winner comes from the smallest set of candidates that
 beats everyone outside it (the Smith criterion). And there are several more.
 
+
 It has long been known that the closure construction itself is generic:
 transitive closure, shortest paths, and widest paths are all instances of
 one algorithm run over different
 semirings~\cite{carre1971algebra,lehmann1977,10.5555/1386688,baras2022path}.
 To our knowledge, though, social choice theory has never been carried to
-that same level of generality. That is our subject.
-
-
+that same level of generality. That is our subject. For each of Schulze's
+guarantees we ask the same question: which algebraic axioms does its proof
+actually need?
 
 \subparagraph*{Our contributions.}
+Interpreting the social choice theory over a semiring
+turns each of Schulze's criteria into a statement about that semiring. Each
+such statement then survives or fails depending on the axioms the carrier
+satisfies, so the criteria stop being a flat list and acquire a structure.
+Describing that structure takes four definitions: (i) \emph{idempotence},
+(ii) \emph{boundedness}, (iii) \emph{selectivity}, and (iv) the \emph{meet
+property}. Our contributions are the following.
+
+\begin{enumerate}
+\item \textbf{A classification of Schulze's criteria by algebraic strength}
+(\Cref{sec:classification}). We prove each criterion at the weakest level of
+structure at which we can establish it, and those levels form a four-step
+hierarchy and each level adds one axiom to the previous one. 
+\begin{itemize}
+\item \textbf{Level 0, no assumptions.} Neutrality holds for every
+semiring.
+\item \textbf{Level 1, boundedness.} Weak Pareto and monotonicity.
+\item \textbf{Level 2, boundedness and selectivity.} The Smith criterion,
+Smith-IIA (Smith independence of irrelevant alternatives), Condorcet consistency, 
+and the resolvability proof.
+\item \textbf{Level 3, boundedness, selectivity, and the meet property.}
+Transitivity of $\succ$, existence of a winner, independence of clones,
+the winner-level form of reversal symmetry, prudence, and the MinMax set.
+\end{itemize}
+\end{enumerate}
 
 \section{Background}\label{sec:prelim}
 \subsection{Semirings and the Natural Order}
@@ -272,7 +298,7 @@ remains meaningful even without boundedness, and the one bare-semiring
 result, neutrality, is a statement about it.
 
 
-\section{Which Axiom Does Each Criterion Need?}
+\section{Which Axiom Does Each Criterion Need?}\label{sec:classification}
 
 \subsection{Level 0: Any Semiring}
 
@@ -280,7 +306,7 @@ result, neutrality, is a statement about it.
 
 \subsection{Level 2: Selectivity}
 
-\subsection{Level 3: Commutativity}
+\subsection{Level 3: The Meet Property}
 
 
 \section{Technical Difficulty in Encdoing}
