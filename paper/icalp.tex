@@ -559,6 +559,136 @@ it, because it turns on $M_{ab}$ and $M_{ba}$ being read off one pair of
 counts, and it is the ballot layer that discharges it.
 
 \subsection{Level 3: The Meet Property}
+The criteria whose proofs compose two beatpaths end to end need the meet
+property in addition. A bound on $\Mstar_{ab}$ and a bound on $\Mstar_{bc}$
+must be combined into a bound on their product, and only the meet property
+does that. One fact about the closure is used throughout: a chain from $x$
+to $y$ followed by one from $y$ to $z$ is itself a chain from $x$ to $z$, so
+\[
+  \Mstar_{xy}\cdot\Mstar_{yz} \;\leq\; \Mstar_{xz}
+  \qquad \text{for all } x,y,z.
+\]
+
+\begin{theorem}[Transitivity]\label{thm:trans}
+Over a bounded, selective semiring with the meet property, $\succ$ is
+transitive for every $M$, hence a strict partial order. With decidable
+equality on the carrier in addition, $\mathcal{S}(M) \neq \emptyset$.
+\end{theorem}
+
+\begin{proof}
+Assume $a \succ b$ and $b \succ c$, and put
+$m = \Mstar_{ab}\cdot\Mstar_{bc}$, so $m \leq \Mstar_{ac}$. By selectivity
+either $\Mstar_{ca} < \Mstar_{ac}$, which is $a \succ c$, or
+$\Mstar_{ac} \leq \Mstar_{ca}$; suppose the latter, so $m \leq \Mstar_{ca}$.
+By selectivity again and the meet property, $m$ is the smaller of
+$\Mstar_{ab}$ and $\Mstar_{bc}$. If $m = \Mstar_{ab}$, then $\Mstar_{ab}$ is
+below both $\Mstar_{bc}$ and $\Mstar_{ca}$, so by the meet property and
+composition
+$\Mstar_{ab} \leq \Mstar_{bc}\cdot\Mstar_{ca} \leq \Mstar_{ba}$, which with
+$\Mstar_{ba} \leq \Mstar_{ab}$ forces equality and contradicts $a \succ b$.
+If $m = \Mstar_{bc}$, the same argument with the letters shifted gives
+$\Mstar_{bc} \leq \Mstar_{ca}\cdot\Mstar_{ab} \leq \Mstar_{cb}$,
+contradicting $b \succ c$. The two products are taken in opposite orders,
+so commutativity is never needed. Finally, a strict partial order on a
+finite set has a maximal element; constructively one finds it by deciding
+comparisons between closure entries, which is where decidable equality
+enters.
+\end{proof}
+
+This is Schulze's own argument: his case split is selectivity, his
+identification of a composite chain's worth with its weaker half is the meet
+property, and nothing else about the carrier is used.
+
+\begin{lemma}\label{lem:commfree}
+On a bounded semiring the meet property forces $\cdot$ to commute.
+\end{lemma}
+
+\begin{proof}
+By \Cref{lem:natural} both $a\cdot b$ and $b\cdot a$ are lower bounds of
+$\{a,b\}$; the meet property makes each the greatest, and a greatest lower
+bound is unique.
+\end{proof}
+
+Commutativity is therefore not an independent axiom of the hierarchy: any
+criterion whose hypotheses contain the meet property has it for free.
+
+Independence of clones compares two elections over different alternative
+sets, so we write $\clo{M}{B}$ for the closure of $M$ restricted to the
+alternatives in $B$, and $\succ^{B}_{M}$ and $\mathcal{S}_{B}(M)$ for the
+relation and winners it induces.
+
+\begin{definition}[Clone replacement]\label{def:clone}
+Let $d \in A$, let $K \neq \emptyset$ be fresh alternatives disjoint from
+$A$, and put $A' = (A \setminus \{d\}) \cup K$. A matrix $N$ over $A'$ is a
+\emph{clone replacement} of $d$ by $K$ in $M$ when, for all
+$a, b \in A \setminus \{d\}$ and $g \in K$,
+\[
+  N_{ga} = M_{da}, \qquad N_{ag} = M_{ad}, \qquad N_{ab} = M_{ab}.
+\]
+Each clone inherits the links of $d$ and the links among survivors are
+untouched; nothing is required of $N_{gh}$ for $g, h \in K$. Both matrices
+carry $1$ on the diagonal, which costs nothing since $M$ and $M \oplus I$
+have the same star.
+\end{definition}
+
+\begin{theorem}[Independence of clones]\label{thm:clones}
+Over a bounded semiring, let $N$ be a clone replacement of $d$ by $K$ in
+$M$. Then for every $a \in A \setminus \{d\}$,
+$a \in \mathcal{S}_{A}(M)$ if and only if $a \in \mathcal{S}_{A'}(N)$. If
+the semiring is moreover selective with the meet property and decidable
+equality, then $d \in \mathcal{S}_{A}(M)$ if and only if
+$\mathcal{S}_{A'}(N) \cap K \neq \emptyset$.
+\end{theorem}
+
+\begin{proof}
+Everything rests on three equalities of chain worths: for all
+$a, b \in A \setminus \{d\}$ and $g \in K$,
+\[
+  \clo{N}{A'}_{ab} = \clo{M}{A}_{ab}, \qquad
+  \clo{N}{A'}_{ag} = \clo{M}{A}_{ad}, \qquad
+  \clo{N}{A'}_{ga} = \clo{M}{A}_{da}.
+\]
+Each is proved by antisymmetry, transporting chains in both directions:
+from old to new, rename $d$ to a fixed clone $g$; from new to old, rename
+every clone to $d$. The image chain has its link strengths recomputed in the
+target matrix, so it is a chain by construction and only a link-by-link
+comparison remains. Crossings between $K$ and the survivors are equalities
+by \Cref{def:clone}. A chain that enters $K$ and leaves it again is
+collapsed onto $d$, where the recomputed link is $M_{dd} = 1$, which
+dominates whatever the clones did among themselves; this is the only use of
+boundedness.
+
+The first clause follows from the equalities alone: a survivor $b$ beats
+$a$ in one election exactly when it does in the other, and a clone $g$
+beats $a$ in the new election exactly when $d$ beat $a$ in the old. For the
+second, if some survivor beat $d$ then by the equalities it beats every
+clone, so no clone wins. If none did, no survivor beats any clone, and only
+other clones can; by \Cref{thm:trans} the relation is a strict partial
+order, so the finite non-empty set $K$ has a maximal element, which is a
+winner.
+\end{proof}
+
+Two further criteria sit at this level, each carrying a profile condition.
+\emph{Prudence} demands that a link stronger than every directed cycle be
+respected by the output. The \emph{MinMax set} $\mathfrak{B}_D$ is the
+union of the proper non-empty subsets of $A$ whose strongest entering link
+is weakest; Schulze regards always electing from it as the most
+characteristic property of his method.
+
+\begin{theorem}[Prudence and the MinMax set]\label{thm:prudminmax}
+Over a bounded, selective semiring with the meet property:
+(i) if $a \neq b$ and $M_{ab}$ is strictly stronger than every directed
+cycle, then $a \succ b$, so $b \notin \mathcal{S}(M)$;
+(ii) with decidable equality in addition, if $a$ lies in a cut-minimising
+set and $b$ lies in none, then $a \succ b$, so
+$\mathcal{S}(M) \subseteq \mathfrak{B}_D$.
+\end{theorem}
+
+The strongest-cycle strength and the cut strengths are joins over links and
+closures. The minimum of the cuts is a parameter constrained by hypotheses
+rather than a computed value, because the carrier has joins but no meet
+over the powerset; those constraints are the profile conditions of the two
+rows.
 
 
 \section{Formal Verification}\label{sec:formalisation}
