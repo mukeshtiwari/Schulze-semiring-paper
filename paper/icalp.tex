@@ -122,9 +122,9 @@ $a,b,c$ and the semiring zero on the diagonal:
 The closure lifts every losing direction to the winning one. The direct link
 from $b$ to $a$ is worth only $1$, but the detour $b \to c \to a$ is worth
 $\min(2,2) = 2$, which matches the direct link from $a$ to $b$; the other
-two pairs behave the same way. The cycle
-in the ballots is flattened into indifference and all three alternatives
-survive as winners.
+two pairs behave the same way. Every entry of $\Mstar$ is therefore $2$, no
+comparison $\Mstar_{ba} < \Mstar_{ab}$ is strict, and $\succ$ is empty. No
+alternative beats another, so all three are winners.
 
 Now keep the profile and change the semiring to $\langle \mathbb{N}^{\infty},
 \min, +\rangle$, reading a link as a cost rather than a strength and
@@ -146,8 +146,9 @@ $a \to b \to c \to a$ then costs $1$ and each reverse hop costs $2$:
   \end{pmatrix}.
 \]
 This time the closure changes nothing off the diagonal. The detour
-$b \to c \to a$ costs $1 + 1 = 2$, no better than the direct hop back, and
-nowhere near the direct hop from $a$ to $b$ at cost $1$. So $a \succ b$, and
+$b \to c \to a$ costs $1 + 1 = 2$, no better than the direct hop back, so
+the cheapest route from $b$ to $a$ costs $2$, while the direct hop from $a$
+to $b$ costs $1$. So $a \succ b$, and
 by symmetry $b \succ c$ and $c \succ a$: the cycle survives the closure as a
 cycle of \emph{strict} wins, every alternative is beaten by another, and the
 winner set is empty.
@@ -406,19 +407,24 @@ level.
 
 \subsection{Level 1: Boundedness}
 
-Two criteria need boundedness, $1 + a = 1$, and nothing beyond it.
+Two criteria need boundedness, $1 + a = 1$, and nothing beyond it. By
+\Cref{lem:natural} it forces $a \cdot b \leq a$ and $a \cdot b \leq b$, so a
+chain is never worth more than any of its links. Both proofs below rest on
+the two consequences: the series closes at $M^{n-1}$, so bounding a closure
+entry means bounding every power, and the closure is monotone in the matrix,
+so raising an entry of $M$ lowers no entry of $\Mstar$.
 
 \begin{theorem}[Weak Pareto]\label{thm:pareto}
-Let $M$ have diagonal $1$, and suppose $M_{ba} \leq M_{ab}$, and that
+Let $a \neq b$, let $M$ have diagonal $1$, and suppose
+$M_{ba} \leq M_{ab}$, and that
 $M_{bx} \leq M_{ax}$ and $M_{xa} \leq M_{xb}$ for every
 $x \notin \{a,b\}$. Then $\Mstar_{ba} \leq \Mstar_{ab}$, and consequently
 $b \in \mathcal{S}(M)$ implies $a \in \mathcal{S}(M)$.
 \end{theorem}
 
-No algebra beyond boundedness is used here, because the hypotheses constrain
-the matrix alone.
-They say that $a$ dominates $b$ head to head and against every third
-alternative, which is a condition on the profile rather than on the carrier.
+The hypotheses constrain the matrix alone: they say that $a$ dominates $b$
+head to head and against every third alternative, which is a condition on
+the profile rather than on the carrier.
 
 \begin{theorem}[Monotonicity]\label{thm:monotone}
 Let $M'$ be obtained from $M$ by raising $a$'s row and lowering $a$'s
@@ -429,7 +435,21 @@ $a \in \mathcal{S}(M)$ implies $a \in \mathcal{S}(M')$: a winner stays a
 winner when it is raised.
 \end{theorem}
 
-Monotonicity also sits at this level. 
+Two independence facts drive this. The closure out of $a$ does not depend on
+the edges into $a$, and the closure into $a$ does not depend on the edges out
+of $a$; both hold because a walk through $a$ is dominated by the part of
+itself that avoids $a$. Raising $a$'s row and lowering its column therefore
+moves $\Mstar_{ab}$ up and $\Mstar_{ba}$ down, and a strict victory survives
+along
+\[
+  (M')^{\ast}_{ba} \;\leq\; \Mstar_{ba} \;<\; \Mstar_{ab} \;\leq\;
+  (M')^{\ast}_{ab},
+\]
+where $a \succ_M b$ supplies the strict middle step; a tie would leave it
+non-strict and the chain would conclude nothing. The winner clause applies
+the same two facts to each rival in turn. All of this concerns $a$ alone:
+raising $a$ may unseat some other winner, and indeed
+$\mathcal{S}(M') \subseteq \mathcal{S}(M)$.
 
 
 \subsection{Level 2: Selectivity}
