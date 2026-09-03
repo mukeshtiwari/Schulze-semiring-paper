@@ -308,6 +308,19 @@ dropping the subscript when $M$ is clear, and write $\mathcal{S}(M)$ for the
 set of $\succ$-maximal alternatives, the \emph{winners}.
 \end{definition}
 
+The comparison in \Cref{def:succ}, in fact, makes sense over any matrix, and reading
+it on the direct matrix $M$ instead of on the closure gives another 
+relation: $a$ beats $b$ \emph{head to head} when $M_{ba} < M_{ab}$, that is,
+when the direct link from $a$ to $b$ is strictly stronger than the direct
+link back. This is the Condorcet relation, and an alternative that beats
+every other head to head is a \emph{Condorcet winner}. The two relations
+can disagree, because the closure lets $a$ outrank $b$ through
+intermediaries even when $b$ wins the direct comparison. 
+Condorcet consistency is the
+criterion that connects them: a Condorcet winner, already unbeaten in the
+direct relation $M$, must remain a winner in closure $\Mstar$.
+
+
 
 \section{Which Axiom Does Each Criterion Need?}\label{sec:classification}
 
