@@ -297,10 +297,75 @@ exactly the simple-path optimum the method prescribes. The truncation
 remains meaningful even without boundedness, and the one bare-semiring
 result, neutrality, is a statement about it.
 
+\section{Beatpath over a Semiring}\label{sec:framework}
+
+\begin{definition}\label{def:succ}
+For a matrix $M$ over an idempotent semiring put
+\[
+  a \succ_M b \quad\text{iff}\quad \Mstar_{ba} < \Mstar_{ab},
+\]
+dropping the subscript when $M$ is clear, and write $\mathcal{S}(M)$ for the
+set of $\succ$-maximal alternatives, the \emph{winners}.
+\end{definition}
+
 
 \section{Which Axiom Does Each Criterion Need?}\label{sec:classification}
 
+We now go through the criteria and record, for each, the weakest algebraic
+hypothesis under which we can establish it. Throughout the section, $M$ and
+$M'$ denote matrices over the carrier of the level in question, $a$, $b$,
+$x$, and $y$ denote alternatives. \Cref{tab:classification}
+summarises; the last column marks criteria that additionally carry a 
+condition on the profile.
+
+\begin{table}[t]
+\centering
+\begin{tabular}{@{}cllc@{}}
+\toprule
+Level & Criterion & Algebraic requirement & Profile \\
+\midrule
+0 & Neutrality                 & none, any semiring       & \\
+\midrule
+1 & Pareto, weak               & bounded                  & $\checkmark$ \\
+1 & Monotonicity               & bounded                  & \\
+\midrule
+2 & Smith criterion            & bounded, selective       & $\checkmark$ \\
+2 & Smith-IIA, weak side       & bounded, selective       & $\checkmark$ \\
+2 & Smith-IIA, strong side     & bounded, selective       & $\checkmark$ \\
+2 & Condorcet consistency      & bounded, selective       & $\checkmark$ \\
+2 & Resolution step            & bounded, selective       & $\checkmark$ \\
+\midrule
+3 & Transitivity of $\succ$    & bounded, selective, meet & \\
+3 & Winner existence           & bounded, selective, meet & \\
+3 & Independence of clones     & bounded, selective, meet & \\
+3 & Reversal symmetry          & bounded, selective, meet & \\
+3 & Prudence                   & bounded, selective, meet & $\checkmark$ \\
+3 & MinMax set                 & bounded, selective, meet & $\checkmark$ \\
+\bottomrule
+\end{tabular}
+\caption{The hierarchy. Each row gives the weakest structure under which we
+can establish the criterion. Levels 0 to 3 stack, each adding to the one
+below.}
+\label{tab:classification}
+\end{table}
+
+
 \subsection{Level 0: Any Semiring}
+
+One criterion needs no algebraic assumption whatsoever.
+
+\begin{theorem}[Neutrality]\label{thm:neutrality}
+Let $\sigma$ be a permutation of $A$ and put
+$M^{\sigma}_{ab} = M_{\sigma a\,\sigma b}$. Then $a \succ_{M^{\sigma}} b$ if
+and only if $\sigma a \succ_{M} \sigma b$, and $a \in \mathcal{S}(M^{\sigma})$
+if and only if $\sigma a \in \mathcal{S}(M)$.
+\end{theorem}
+
+Neutrality holds over any semiring at all. It reduces to the invariance of a
+finite sum under a permutation of the index set, and the closure then
+respects that permutation term by term. It needs neither boundedness nor
+idempotence, and it is the only criterion we prove at the bare semiring
+level.
 
 \subsection{Level 1: Boundedness}
 
