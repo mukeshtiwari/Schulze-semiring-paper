@@ -208,6 +208,30 @@ and the resolvability proof.
 Transitivity of $\succ$, existence of a winner, independence of clones,
 the winner-level form of reversal symmetry, prudence, and the MinMax set.
 \end{itemize}
+
+
+\item \textbf{An exact characterisation at Level 3} Todo
+
+
+\item \textbf{The same characterisation for winner existence} Todo
+
+\item \textbf{Independence of clones, and its equivalence with winner
+existence} Todo
+
+
+\item \textbf{Sharpness of the classification} Todo
+
+
+\item \textbf{A complete mechanisation} in \rocq{}
+(\Cref{sec:formalisation}). A classification by \emph{weakest} hypothesis is
+a claim about what a proof does \emph{not} use. Informal argument gets
+exactly this kind of claim wrong, because an unused hypothesis costs the
+author nothing and is invisible to the reader. Every entry in our table is
+therefore backed by a \rocq{} proof that typechecks without the hypotheses we
+omit. The full development, more than
+$20{,}000$ lines of \rocq{} proof, is available in an
+\href{https://anonymous.4open.science/r/Semiring_graph_algorithm-000E/README.md}{\textcolor{blue}{anonymous repository}}.
+
 \end{enumerate}
 
 \section{Background}\label{sec:prelim}
@@ -537,7 +561,7 @@ counts, and it is the ballot layer that discharges it.
 \subsection{Level 3: The Meet Property}
 
 
-\section{Formal Verification}
+\section{Formal Verification}\label{sec:formalisation}
 
 Our development is carried out in \rocq{}, and its proofs are constructive,
 so the definitions extract to executable OCaml code that meets the
