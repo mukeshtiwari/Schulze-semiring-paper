@@ -320,14 +320,29 @@ Condorcet consistency is the
 criterion that connects them: a Condorcet winner, already unbeaten in the
 direct relation $M$, must remain a winner in closure $\Mstar$.
 
-Both relations are read off a single matrix $M$, and our development takes
-that matrix as primitive. The Schulze method derives $M$ from a profile of
-ballots, but nothing below mentions ballots: every criterion is a statement
-about an arbitrary matrix over the carrier, and its proof must hold for all
-of them. A few of Schulze's results, however, genuinely depend on how $M$
-arose from a profile, and these cannot be stated in that form. For each we
-add the ballot-level fact its proof needs as an explicit hypothesis on $M$,
-and \Cref{tab:classification} marks the criteria that carry one.
+Our development takes $M$ as a primitive. The Schulze method derives $M$
+from a profile of ballots, but the criteria below are stated and proved at
+the matrix level, over an arbitrary semiring. That is where the algebra
+lives, but it is not where all of Schulze's arguments live: Pareto appeals
+to the transitivity of each ballot, Smith and Condorcet to the fact that
+$M_{ab}$ and $M_{ba}$ are read off one pair of counts, and monotonicity and
+independence of clones to how those counts move when ballots change. A
+matrix has discarded all of this, so each such criterion carries the fact
+its proof needs as an explicit hypothesis on $M$, and
+\Cref{tab:classification} marks the ones that do.
+
+A reader may reasonably ask whether those hypotheses are doing too much of
+the work. They are not, and a second layer shows why: it derives them
+instead of assuming them. That layer builds $M$ from ballots. A ballot ranks
+the alternatives, a profile is a list of ballots, and the entry $M_{ab}$
+comes from the number of voters who prefer $a$ to $b$ and the number who
+prefer $b$ to $a$. Any way of turning that pair of counts into a strength
+will do, provided it meets two conditions of Schulze's: more support with no
+more opposition makes a link stronger, and a win counts for more than a tie,
+a tie for more than a loss. Winning votes, margins, and losing votes all
+qualify. For each criterion the layer derives its hypotheses on $M$ from the
+premise Schulze states about ballots, so the results apply to actual
+elections and not only to abstract matrices.
 
 
 
@@ -396,12 +411,22 @@ level.
 \subsection{Level 3: The Meet Property}
 
 
-\section{Technical Difficulty in Encdoing}
-Since we are working in matrix setting of semiring and there 
-are no ballots, some of the theorems, e.g., resolvability cannot 
-be expressed cleanly. 
+\section{Formal Verification}
 
-\section{Formalisation Verification}
+Our development is carried out in \rocq{}, and its proofs are constructive,
+so the definitions extract to executable OCaml code that meets the
+specifications proved of them. It runs to some $16{,}000$ lines across $37$
+files. Nothing is admitted and no axiom is assumed.
+
+Although our aim is to determine which semiring axioms each of Schulze's
+criteria needs, the formalisation is not confined to that question.
+Everything is parameterised over an arbitrary semiring, so instantiating the
+carrier yields a verified implementation of any problem the same
+construction solves. Besides the Schulze instance we extract and run three
+others: shortest paths over $\langle \mathbb{N}^{\infty}, \min, +\rangle$,
+widest-shortest paths, which minimise length and break ties by bottleneck
+width, and a product semiring pairing latency with bandwidth that models
+routing across $5$G network slices.
 
 \section{Related Work}\label{sec:related}
 
