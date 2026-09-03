@@ -62,6 +62,16 @@ The criteria that compose two beatpaths use in addition a
 $b$. Reversal symmetry, in its relation-level form, is the outlier: it needs
 only \emph{commutativity}, over a plain semiring.
 
+At the top the converses hold as well. Over a bounded semiring with
+decidable equality and at least three alternatives, the beatpath relation is
+transitive for every profile exactly when the carrier is selective and has
+the meet property, and that is exactly when it is $\max$ and $\min$ on a
+total order. These two operations are therefore not one choice among
+several: no others guarantee an ordering. All that stays free is the scale
+the strengths are measured on, which may be any total order. The same two axioms
+characterise winner existence, though it needs four alternatives rather than
+three, and three do not suffice. They characterise independence of clones
+too, which here turns out to be equivalent to winner existence.
 
 \end{abstract}
 
@@ -452,7 +462,78 @@ raising $a$ may unseat some other winner, and indeed
 $\mathcal{S}(M') \subseteq \mathcal{S}(M)$.
 
 
+
 \subsection{Level 2: Selectivity}
+
+Selectivity, $x + y \in \{x,y\}$, is exactly totality of the natural order.
+It buys one move, and every criterion at this level uses it: turning
+\emph{$b$ does not beat $a$} into \emph{$a$ beats $b$}. Under a partial
+order these are not complementary, since $\Mstar_{ab}$ and $\Mstar_{ba}$ may
+be incomparable and neither alternative beat the other. Under a total order
+one of the two comparisons must hold, so a proof may split on which.
+
+\begin{theorem}[Smith criterion]\label{thm:smith}
+Let $B_1, B_2$ partition $A$ with $B_1 \neq \emptyset$, and suppose there is
+a strength $c$ with $M_{ba} < c \leq M_{ab}$ for all $a \in B_1$ and
+$b \in B_2$. Then $a \succ b$ for every $a \in B_1$ and $b \in B_2$, and
+every winner lies in $B_1$.
+\end{theorem}
+
+
+\begin{theorem}[Smith-IIA]\label{thm:smithiia}
+Under the hypotheses of \Cref{thm:smith}, together with a separation
+$c \leq M_{xy} + M_{yx}$ for $x \neq y$ and a unit diagonal on $M$, deleting
+any $d \in B_2$ from the ballot leaves the winner status of every $a \in B_1$
+unchanged: $a \in \mathcal{S}_{A}(M)$ if and only if
+$a \in \mathcal{S}_{A \setminus \{d\}}(M)$. Since every winner lies in $B_1$
+by \Cref{thm:smith}, the winner set itself is unchanged. The whole of $B_2$
+may equally be deleted at once: for every $a \in B_1$,
+$a \in \mathcal{S}_{A}(M)$ if and only if $a \in \mathcal{S}_{B_1}(M)$.
+\end{theorem}
+
+
+
+\begin{theorem}[Smith-IIA, strong side]\label{thm:smithiiastrong}
+Let $B_1, B_2$ partition $A$, and suppose there is a strength $c$ with
+$M_{ba} < c$ for all $a \in B_1$ and $b \in B_2$, together with the
+separation $c \leq M_{xy} + M_{yx}$ for $x \neq y$ and a unit diagonal on
+$M$. Then deleting any $d \in B_1$ from the ballot leaves the beat relation
+on the weak block unchanged: for all $e, f \in B_2$, \;
+$e \succ^{A}_{M} f$ if and only if $e \succ^{A \setminus \{d\}}_{M} f$.
+\end{theorem}
+
+
+
+\begin{theorem}[Condorcet consistency]\label{thm:condorcet}
+Let $a$ be a Condorcet winner of $M$, and suppose that
+$M_{za} < \Mstar_{ax}$ for all $z, x \neq a$ with $z \neq x$. Then
+$a \succ x$ for every $x \neq a$, and hence $\mathcal{S}(M) = \{a\}$.
+\end{theorem}
+
+All four theorems have one shape. A threshold $c$ cuts the alternatives into
+a strong block and a weak one: every link from strong to weak reaches $c$,
+and every link back falls short of it. Selectivity converts that gap between
+raw links into a strict comparison of closure entries, which is what
+\Cref{def:succ} reads as a win. \Cref{thm:condorcet} is the case
+$B_1 = \{a\}$, with the cut written directly as $M_{za} < \Mstar_{ax}$, and
+there the conclusion sharpens to uniqueness: a lone strong alternative beats
+every other, so no other can survive.
+
+The two halves of Smith-IIA differ in which block is disturbed. Deleting a
+weak alternative (\Cref{thm:smithiia}) leaves the winner status of every
+strong one alone, so the winner set is untouched and the election may as
+well have been run on $B_1$ from the start. Deleting a strong alternative
+(\Cref{thm:smithiiastrong}) instead leaves the beat relation among the weak
+ones alone, and needs only the one-sided cut $M_{ba} < c$, since nothing
+about the links out of $B_1$ bears on comparisons inside $B_2$. Both carry
+the auxiliary hypothesis $c \leq M_{xy} + M_{yx}$, which says that for every
+pair the stronger of its two directions reaches the threshold.
+
+None of these hypotheses constrains the carrier; each constrains the
+profile. The threshold is Schulze's tie strength, since a victory outranks a
+tie and a tie outranks a defeat. No construction on the carrier can supply
+it, because it turns on $M_{ab}$ and $M_{ba}$ being read off one pair of
+counts, and it is the ballot layer that discharges it.
 
 \subsection{Level 3: The Meet Property}
 
@@ -491,7 +572,7 @@ theorems~\cite{arrow1950difficulty,nipkow2009social} and verified vote counting,
 the Schulze method, are well
 established~\cite{10.1007/978-3-319-66107-0_26,ghale2018modular,10.1007/978-3-030-03592-1_5}.
 That work verifies a particular procedure at a fixed carrier. Our concern is
-complementary: it asks how much algebraic structure a property costs.
+complementary: it asks how much algebraic structure a property costs. 
 
 \section{Conclusion}\label{sec:conclusion}
 
