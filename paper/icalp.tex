@@ -406,6 +406,32 @@ level.
 
 \subsection{Level 1: Boundedness}
 
+Two criteria need boundedness, $1 + a = 1$, and nothing beyond it.
+
+\begin{theorem}[Weak Pareto]\label{thm:pareto}
+Let $M$ have diagonal $1$, and suppose $M_{ba} \leq M_{ab}$, and that
+$M_{bx} \leq M_{ax}$ and $M_{xa} \leq M_{xb}$ for every
+$x \notin \{a,b\}$. Then $\Mstar_{ba} \leq \Mstar_{ab}$, and consequently
+$b \in \mathcal{S}(M)$ implies $a \in \mathcal{S}(M)$.
+\end{theorem}
+
+No algebra beyond boundedness is used here, because the hypotheses constrain
+the matrix alone.
+They say that $a$ dominates $b$ head to head and against every third
+alternative, which is a condition on the profile rather than on the carrier.
+
+\begin{theorem}[Monotonicity]\label{thm:monotone}
+Let $M'$ be obtained from $M$ by raising $a$'s row and lowering $a$'s
+column: $M_{ay} \leq M'_{ay}$ for every $y$, $M'_{xa} \leq M_{xa}$ for every
+$x$, and $M_{xy} = M'_{xy}$ whenever $x \neq a$ and $y \neq a$. Then
+$a \succ_M b$ implies $a \succ_{M'} b$, and consequently
+$a \in \mathcal{S}(M)$ implies $a \in \mathcal{S}(M')$: a winner stays a
+winner when it is raised.
+\end{theorem}
+
+Monotonicity also sits at this level. 
+
+
 \subsection{Level 2: Selectivity}
 
 \subsection{Level 3: The Meet Property}
