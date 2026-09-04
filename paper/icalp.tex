@@ -213,16 +213,42 @@ the winner-level form of reversal symmetry, prudence, and the MinMax set.
 \end{itemize}
 
 
-\item \textbf{An exact characterisation at Level 3} Todo
+\item \textbf{An exact characterisation at Level 3}
+(\Cref{thm:characterisation}). The two axioms of Level 3 are not merely
+enough for transitivity; they are exactly what it costs. Over a bounded
+semiring with decidable equality and at least three alternatives, $\succ$ is
+transitive for every matrix if and only if the carrier is selective and has
+the meet property, and a carrier with both is $\max$ and $\min$ on a total
+order (\Cref{thm:structure}). Schulze's two operations are therefore not one
+workable choice among several. They are the only one, and the only freedom
+left is which totally ordered scale the strengths are drawn from.
 
-
-\item \textbf{The same characterisation for winner existence} Todo
+\item \textbf{The same characterisation for winner existence}
+(\Cref{thm:winnerchar}). Those same two axioms are exactly what it costs to
+guarantee that some alternative is unbeaten. Four alternatives are needed
+here rather than three, and four is optimal: over the four-element diamond
+lattice, which has the meet property but is not selective, every matrix on
+three alternatives still has a winner, so no three-alternative witness could
+force selectivity.
 
 \item \textbf{Independence of clones, and its equivalence with winner
-existence} Todo
+existence} (\Cref{thm:clonechar}). Clone independence is the criterion
+Schulze's method is best known for, and it too is characterised by the same
+two axioms. It follows that on any carrier the two guarantees stand or fall
+together: a carrier that always returns a winner is automatically
+clone-independent, and one that is clone-independent always returns a
+winner.
 
 
-\item \textbf{Sharpness of the classification} Todo
+\item \textbf{Sharpness of the classification} (\Cref{sec:sharp}). Each
+axiom is necessary on its own, not merely jointly. The tropical carrier is
+selective but lacks the meet property, and already at three alternatives it
+admits a matrix with no winner. The four-element diamond has the meet
+property but is not selective, and it admits one at four; over the diamond
+every matrix on three alternatives still has a winner, checked by
+enumerating all $4^{9}$ of them, so the bound of four is optimal. The
+diamond also refutes every Level 2 criterion, which is what makes that level
+sharp too.
 
 
 \item \textbf{A complete mechanisation} in \rocq{}
@@ -386,6 +412,79 @@ qualify. For each criterion the layer derives its hypotheses on $M$ from the
 premise Schulze states about ballots, so the results apply to actual
 elections and not only to abstract matrices.
 
+\subsection{Paths, not Walks}\label{sec:walks}
+
+One thing about $\Mstar$ still needs checking: that it computes what the
+method prescribes. At first sight it does not. Schulze takes the best
+\emph{simple path}, a route that visits no alternative twice, with no bound
+on its length. The power $M^{k}$ instead joins over \emph{walks} of length
+exactly $k$, routes that may revisit alternatives and run round self-loops,
+and $\Mstar$ cuts the sum off at length $n-1$. The two mismatches are that
+$\Mstar$ ranges over the wrong objects, walks rather than simple paths, and
+stops at the wrong length, $n-1$ rather than unbounded. Neither turns out to
+matter.
+
+\begin{proposition}\label{prop:walks}
+Over a bounded semiring, for all $a,b$ the join over all walks from $a$ to $b$
+of length at most $n-1$ equals the join over all simple paths from $a$ to $b$.
+\end{proposition}
+
+\begin{proof}
+Write $W$ for the join over walks of length at most $n-1$ and $P$ for the
+join over simple paths. Every simple path visits each of the $n$ alternatives 
+at most once, so it has
+at most $n-1$ edges and is therefore one of the walks joined in $W$. Hence
+$P \leq W$, and the truncation at $n-1$ discards no simple path.
+
+For the other direction, take a walk from $a$ to $b$. If it repeats a vertex
+then it contains a cycle, and deleting that cycle leaves a shorter walk with
+the same endpoints. The deletion cannot decrease the value: a product is
+below each of its factors (\Cref{lem:natural}), so discarding factors moves
+the value up or leaves it fixed. Each deletion shortens the walk, so the
+process terminates, and it can only stop at a walk with no repeated vertex,
+which is a simple path. Every walk is therefore dominated by some simple
+path, giving $W \leq P$. The two joins are equal by antisymmetry.
+\proofat{algorithm/PathN.v}{reduce\_path\_\allowbreak into\_elem\_path\_gen}
+\end{proof}
+
+Boundedness is what makes the argument go through, and idempotence on its
+own would not be enough: without $a \cdot b \leq a$ a cycle can raise a
+walk's value, and then $\Mstar$ is simply not the join over paths. The
+result is proved rather than assumed. Cutting a cycle out of a walk and
+knowing that the process terminates in a simple path is a good deal more
+work than the sketch above suggests, and the machinery for it is the bulk of
+\rocqfile{algorithm/PathN.v}{PathN.v}, at some $3{,}000$ lines the largest
+file in the development.
+
+\subsection{Instances}\label{sec:instances}
+
+\begin{table}[t]
+\centering
+\begin{tabular}{@{}lll@{}}
+\toprule
+Instance & $+$ & $\cdot$ \\
+\midrule
+Margin                 & $\max$ & $\min$ \\
+Winning votes          & $\max$ & $\min$ \\
+Losing votes           & $\max$ & $\min$ \\
+\midrule
+Widest--shortest path  & lexicographic & componentwise \\
+Shortest path          & $\min$ & $+$ \\
+Reachability           & $\vee$ & $\wedge$ \\
+\bottomrule
+\end{tabular}
+\caption{Instances of the framework. The three voting measures differ in
+the underlying total order, not in the operations. The lower block shows that the
+same framework covers standard algebraic-path problems; of these,
+widest--shortest and shortest path are instantiated in the development.}
+\label{tab:instances}
+\end{table}
+
+\Cref{tab:instances} lists the carriers we instantiate. The voting measures
+differ only in \emph{which} total order of strengths is used; the operations are
+identical throughout. That uniformity is an observation the framework makes
+visible, and \Cref{thm:characterisation} will explain that it is forced rather
+than conventional.
 
 
 \section{Which Axiom Does Each Criterion Need?}\label{sec:classification}
@@ -879,6 +978,80 @@ Independence of clones is the criterion Schulze's method is best known for,
 and in this setting it is not an extra demand at all: a carrier that always
 returns a winner is automatically clone-independent, and conversely.
 
+\section{Sharpness}\label{sec:sharp}
+
+The characterisations of \Cref{sec:classification} say that selectivity and
+the meet property are together necessary. They do not by themselves say that
+each is necessary on its own, nor that the cardinality bounds cannot be
+improved. This section settles both with concrete carriers, each small
+enough to check by hand and each checked by machine.
+
+Two carriers do all the work, and they are chosen so that each drops exactly
+one of the two axioms.
+
+\subparagraph*{The tropical carrier: selective, no meet property.}
+Take $\langle \mathbb{N}^{\infty}, \min, +\rangle$, the shortest-path
+semiring of \Cref{ex:tropical}. Its natural order is total, since $\min$
+always returns one of its arguments, so it is selective. It fails the meet
+property, and the smallest counterexample is the one already visible in the
+introduction: $1$ lies below $1$ twice over, but $1 \cdot 1 = 2$, and in the
+natural order of this carrier $2$ lies strictly below $1$ rather than above
+it. Multiplication is therefore a lower bound of its factors but not the
+greatest one.
+
+That is enough to break the method at three alternatives.
+\Cref{ex:tropical} exhibits the matrix: hops forward round a triangle cost
+$1$, hops back cost $2$, and the closure leaves the asymmetry untouched, so
+$a \succ b \succ c \succ a$ is a cycle of strict wins and no alternative is
+unbeaten. Selectivity alone therefore buys nothing at Level 3, and the meet
+property is genuinely needed.
+\proofat{examples/SharpnessWitness.v}{tropical\_no\_winner\_at\_three}
+
+\subparagraph*{The diamond: meet property, not selective.}
+For the other direction take the four-element lattice
+$\Diam = \{\bot, p, q, \top\}$ in which $p$ and $q$ are incomparable, with
+join for addition and meet for multiplication. Multiplication is by
+construction the greatest lower bound, so the meet property holds. The
+carrier is not selective, because $p + q = \top$ is neither $p$ nor $q$;
+equivalently, $p$ and $q$ are two strengths that cannot be compared.
+
+Here the failure needs a fourth alternative, and that is not an artefact of
+how we searched. Over $\Diam$ \emph{every} matrix on three alternatives has
+a winner. There are $4^{9}$ such matrices, and we check all of them by
+evaluating a boolean winner test, proved sound against $\mathcal{S}$, on a
+tabulation of every one.
+\proofat{examples/SharpnessWitness.v}{diamond\_every\_profile\_has\_winner}
+
+At four alternatives the winner disappears. The square witness of
+\Cref{thm:winnerchar}, instantiated with the incomparable pair $p$ and $q$,
+gives a matrix whose beat relation runs round all four alternatives, so
+again nobody is unbeaten. The meet property alone therefore buys nothing
+either, selectivity is genuinely needed, and the bound of four in
+\Cref{thm:winnerchar} cannot be lowered to three.
+\proofat{examples/SharpnessWitness.v}{diamond\_no\_winner\_at\_four}
+
+\subparagraph*{Level 2 is sharp as well.}
+The same diamond settles the level below. Boundedness and the meet property
+are not enough for any of the Level 2 criteria: over $\Diam$ we exhibit a
+matrix with a clean threshold separating a strong block from a weak one and
+a winner outside the strong block, so the Smith criterion fails; a matrix
+with a Condorcet winner that the closure does not elect; a matrix where an
+untied winner is not unique, so the resolution step fails; and matrices
+refuting both halves of Smith-IIA. Each is a small explicit table, and each
+failure is a direct consequence of two incomparable strengths, which is
+precisely what selectivity forbids.
+\rocqrelated{\rocqfile{examples/SharpnessWitness.v}{smith\_fails\_over\_diamond},
+\rocqfile{examples/SharpnessWitness.v}{condorcet\_fails\_\allowbreak over\_diamond},
+\rocqfile{examples/SharpnessWitness.v}{resolution\_fails\_\allowbreak over\_diamond}, and
+\rocqfile{examples/SharpnessWitness.v}{smith\_iia\_fails\_\allowbreak over\_diamond}}
+
+Taken together the two carriers show that the hierarchy is not an artefact
+of how we happened to write the proofs. Drop selectivity and Level 2 and
+Level 3 both collapse; drop the meet property and Level 3 collapses; and the
+three alternatives that suffice for transitivity provably do not suffice for
+winner existence.
+
+
 
 \section{Formal Verification}\label{sec:formalisation}
 
@@ -1040,27 +1213,28 @@ That work verifies a particular procedure at a fixed carrier. Our concern is
 complementary: it asks how much algebraic structure a property costs. 
 
 \section{Conclusion}\label{sec:conclusion}
-Interpreting social choice axioms over a bounded semiring turns a flat list
-of guarantees into a hierarchy, and the hierarchy is exact at the top. The
-two structural guarantees (that the outcome is an ordering, and that a
-winner exists) are each \emph{equivalent} to selectivity with the meet
-property, hence to the carrier being $\max$ and $\min$ on a total order.
-Schulze's arithmetic is a consequence of the guarantees, not a modelling
-choice. Alongside the algebra, several criteria carry profile conditions
-that no carrier can discharge. Independence of clones cannot be stated over a
-fixed finite type of alternatives, but parameterising the closure by a list
-removes that obstruction, and the criterion then joins the hierarchy at the
-same level and turns out to be equivalent to winner existence rather than
-merely to need the same algebra. The same closure also gives Smith-IIA in its
-genuine removal form, on both sides of the cut: deleting the non-Smith
-alternatives from the ballot, one at a time or all at once, and equally
-deleting a Smith alternative, rather than neutralising them in the matrix.
-The two operations agree because an alternative with no links is exactly one
-that a closure over a sublist can ignore. It also settles the size of the
-clone characterisation: five alternatives are optimal, because over the
-diamond the clone criterion holds outright at four. One question remains
-open: whether width is the exact boundary for counterexamples at three
-alternatives.
+
+We set out to ask, for each of Schulze's guarantees, how much arithmetic its
+proof really needs. The answer is that the guarantees are not a flat list.
+Neutrality holds over any semiring at all. Weak Pareto and monotonicity need
+only that the empty path is unbeatable. The Smith criterion and Condorcet
+consistency need in addition that any two strengths are comparable. The
+guarantees that join two beatpaths end to end need one thing more, that the
+worth of a composite chain is the weaker of its halves.
+
+At the top the levels are not merely sufficient but exact. Transitivity of
+the outranking relation, existence of a winner, and independence of clones
+each hold for every profile precisely when the carrier is selective and has
+the meet property, and a carrier with those two properties is $\max$ and
+$\min$ on a total order. So the operations Schulze chose are not one
+reasonable choice among several. They are the only ones that work, and the
+only freedom left is the scale on which strengths are recorded. That
+independence of clones, the criterion the method is best known for, turns
+out to be the same condition on the carrier as the bare existence of a
+winner was not something we expected. The story however is not uniformly tidy. Several
+criteria carry conditions that no choice of carrier can supply, because they
+are conditions on the ballots rather than on the algebra; a separate ballot
+layer discharges those from Schulze's own premises. 
 
 
 \bibliography{ref,icalp}
