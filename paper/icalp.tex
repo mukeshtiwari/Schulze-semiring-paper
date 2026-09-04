@@ -50,7 +50,7 @@ The Schulze method is a widely used single-winner election method rule based on 
 another when the strongest path from one to the other is stronger than the strongest 
 path in the opposite direction. Since the strength of a path is determined by its weakest 
 link, this can be expressed using the Kleene star of a matrix over the 
-semiring \(\langle \mathbb{Z}^{\pm\infty}, \max, \min\rangle\). 
+semiring \(\langle \mathbb{N}^{\infty}, \max, \min\rangle\). 
 Schulze's guarantees, such as neutrality, monotonicity, pareto, etc.,  
 are therefore theorems about that semiring.
 
@@ -66,15 +66,14 @@ The criteria that compose two beatpaths use in addition a
 $b$. 
 
 At the top the converses hold as well. Over a bounded semiring with
-decidable equality and at least three alternatives, the beatpath relation is
-transitive for every profile exactly when the carrier is selective and has
-the meet property, and that is exactly when it is $\max$ and $\min$ on a
-total order. These two operations are therefore not one choice among
-several: no others guarantee an ordering. All that stays free is the scale
-the strengths are measured on, which may be any total order. The same two axioms
-characterise winner existence, though it needs four alternatives rather than
-three, and three do not suffice. They characterise independence of clones
-too, which here turns out to be equivalent to winner existence.
+decidable equality, the beatpath relation is transitive for every profile
+exactly when the carrier is selective and has the meet property, and that is
+exactly when it is $\max$ and $\min$ on a total order. These two operations
+are therefore not one choice among several: no others guarantee an ordering.
+All that stays free is the scale the strengths are measured on, which may be
+any total order. The same two axioms characterise winner existence and
+independence of clones, and the latter two turn out to be the same condition
+on the carrier.
 
 \end{abstract}
 
@@ -89,7 +88,7 @@ star
 \[
   \Mstar \;=\; I \oplus M \oplus M^{2} \oplus \cdots
 \]
-of $M$ over the semiring $\langle \mathbb{Z}^{\pm\infty}, \max, \min\rangle$.
+of $M$ over the semiring $\langle \mathbb{N}^{\infty}, \max, \min\rangle$.
 The method's output follows from the comparison
 \[
   a \succ b \quad\text{iff}\quad \Mstar_{ba} < \Mstar_{ab}
@@ -97,7 +96,7 @@ The method's output follows from the comparison
 taken in that semiring's natural order.
 
 
-Now change the arithmetic,  from $\langle \mathbb{Z}^{\pm\infty}, \max, \min\rangle$ to 
+Now change the arithmetic,  from $\langle \mathbb{N}^{\infty}, \max, \min\rangle$ to 
 $\langle \mathbb{N}^{\infty}, \min, +\rangle$, and keep everything else. 
 Let a chain be worth the
 \emph{sum} of its links instead of the weakest, and let the best chain be the
@@ -114,15 +113,15 @@ to one, so the majority relation is a cycle and there is no Condorcet
 winner. Every method built on pairwise comparisons must say something about
 this profile.
 
-Over $\langle \mathbb{Z}^{\pm\infty}, \max, \min\rangle$, let $M_{ij}$ be
+Over $\langle \mathbb{N}^{\infty}, \max, \min\rangle$, let $M_{ij}$ be
 the number of voters ranking $i$ above $j$, with rows and columns indexed
-$a,b,c$ and the semiring zero on the diagonal:
+$a,b,c$ and $0$ on the diagonal:
 \[
   M \;=\;
   \begin{pmatrix}
-    -\infty & 2 & 1 \\
-    1 & -\infty & 2 \\
-    2 & 1 & -\infty
+    0 & 2 & 1 \\
+    1 & 0 & 2 \\
+    2 & 1 & 0
   \end{pmatrix},
   \qquad
   \Mstar \;=\;
@@ -644,9 +643,8 @@ $a, b \in A \setminus \{d\}$ and $g \in K$,
   N_{ga} = M_{da}, \qquad N_{ag} = M_{ad}, \qquad N_{ab} = M_{ab}.
 \]
 Each clone inherits the links of $d$ and the links among survivors are
-untouched; nothing is required of $N_{gh}$ for $g, h \in K$. Both matrices
-carry $1$ on the diagonal, which costs nothing since $M$ and $M \oplus I$
-have the same star.
+untouched; nothing is required of $N_{gh}$ for $g, h \in K$. Both matrices carry $1$ on the diagonal, which costs
+nothing since $M$ and $M \oplus I$ have the same star.
 \proofat{algorithm/CloneN.v}{CloneN.v}
 \end{definition}
 
@@ -711,8 +709,175 @@ rather than a computed value, because the carrier has joins but no meet
 over the powerset; those constraints are the profile conditions of the two
 rows.
 
-\section{The Top of the Hierarchy Is Exact}\label{sec:characterisation}
-Todo
+
+\section{The Top of the Hierarchy is Exact}\label{sec:characterisation}
+
+\Cref{thm:trans} says selectivity and the meet property suffice. This section
+shows they are necessary, so that the second block of
+\Cref{tab:classification} is not a sufficient condition but a
+characterisation.
+
+We first record what the two axioms do to the carrier. They already force
+multiplication to commute (\Cref{lem:commfree}), and in fact they pin both
+operations completely.
+
+\begin{proposition}[Structure]\label{thm:structure}
+A bounded semiring that is selective and has the meet property is a
+\emph{bottleneck semiring}: its natural order is total, with least element
+$0$ and greatest element $1$; $+$ is the join $\max$ of that order, and
+$\cdot$ is the meet $\min$.
+\proofat{algorithm/SchulzeOrderN.v}{structure\_add\_is\_max,
+structure\_mul\_is\_min}
+\end{proposition}
+
+\begin{proof}
+Selectivity says the order is total, and \Cref{lem:natural}
+identifies its extremes and shows $+$ is the join, which in a total order is
+$\max$. The meet property makes $a\cdot b$ the greatest lower bound, which
+in a total order is $\min$. 
+\end{proof}
+
+
+\begin{theorem}[Transitivity Characterisation]\label{thm:characterisation}
+Let $R$ be a bounded semiring with decidable equality and let $|A| \geq 3$.
+Then
+\[
+  \succ_M \text{ is transitive for every } M
+  \quad\Longleftrightarrow\quad
+  R \text{ is selective and has the meet property,}
+\]
+and hence, by \Cref{thm:structure}, if and only if $R$ is a bottleneck
+semiring.
+\proofat{algorithm/TransitivityN.v}{transitivity\_\allowbreak characterisation}
+\end{theorem}
+
+\begin{proof}
+Right to left is \Cref{thm:trans}. For the converse, assume $\succ_M$ is
+transitive for every $M$ and fix three distinct alternatives $X, Y, Z$.
+
+Everything rests on one construction. For $p, q, r \in R$ let $T(p,q,r)$ be
+the matrix on $\{X,Y,Z\}$ with exactly three links, $X \to Y$ worth $p$,
+$Y \to Z$ worth $q$, and $Z \to X$ worth $r$, and $0$ everywhere else. The
+only route from $Y$ back to $X$ is $Y \to Z \to X$, worth $q \cdot r$, so
+$q \cdot r < p$ makes $X \succ Y$; likewise $r \cdot p < q$ makes
+$Y \succ Z$. Transitivity then forces $X \succ Z$. But the only route from
+$X$ to $Z$ is $X \to Y \to Z$, so the closure entry $T^{\ast}_{XZ}$ is at
+most $p \cdot q$, while the direct link gives $r \leq T^{\ast}_{ZX}$.
+Chaining the three facts,
+\[
+  q \cdot r < p \;\text{ and }\; r \cdot p < q
+  \qquad\Longrightarrow\qquad
+  r < p \cdot q .
+\]
+Call this the \emph{triangle test}. It converts two strict comparisons into
+a third, and both halves of the proof are applications of it.
+
+\emph{Selectivity.} Suppose $x$ and $y$ were incomparable, so neither
+$x \leq y$ nor $y \leq x$. Run the test on $p = x$, $q = y$, $r = x \cdot y$.
+Its premises hold: $y \cdot (x \cdot y)$ lies below $x$, and it cannot equal
+$x$, since it also lies below $y$ and that would give $x \leq y$;
+symmetrically $(x \cdot y) \cdot x$ lies strictly below $y$. The test
+concludes $x \cdot y < x \cdot y$, which is absurd. So no incomparable pair
+exists, and the natural order is total, which is selectivity.
+
+\emph{Meet property.} Let $m \leq a$ and $m \leq b$, and suppose
+$m \not\leq a \cdot b$. Run the test on $p = a$, $q = b$, $r = m$. Its two
+premises ask that $b \cdot m$ lie strictly below $a$ and $m \cdot a$
+strictly below $b$; the non-strict parts are immediate, since
+$b \cdot m \leq m \leq a$ and $m \cdot a \leq m \leq b$. If both are strict
+the test gives $m \leq a \cdot b$, contradicting the supposition. Otherwise
+one of them is an equality. If $b \cdot m = a$ then $a = m$, and running the
+test instead on the triangle $(b, m, m)$ contradicts that equality; the case
+$m \cdot a = b$ is symmetric. So $m \leq a \cdot b$ in every case.
+
+Decidable equality is used only in this direction. Both conclusions are
+decidable statements, and each is reached by refuting its negation.
+\end{proof}
+
+
+
+\begin{theorem}[Winner existence]\label{thm:winnerchar}
+Let $R$ be a bounded semiring with decidable equality and let $|A| \geq 4$.
+Then $\mathcal{S}(M) \neq \emptyset$ for every $M$ if and only if $R$ is
+selective and has the meet property.
+\proofat{algorithm/WinnerexistenceN.v}{winner\_exists\_\allowbreak characterisation}
+\end{theorem}
+
+\begin{proof}
+Right to left is \Cref{thm:trans}. For the converse we need a second
+witness, because the triangle of \Cref{thm:characterisation} cannot do this
+job alone.
+
+\emph{Selectivity.} Suppose $x$ and $y$ are incomparable. Then
+$x \cdot y < y$ and $y \cdot x < x$: each product lies below both factors,
+and equality either way would make $x$ and $y$ comparable. Build the
+\emph{square} $S(x,y)$ on four alternatives $A, B, C, D$, with four links
+$B \to A$ and $D \to C$ worth $x$, and $A \to D$ and $C \to B$ worth $y$,
+and $0$ elsewhere. Each alternative has exactly one route back to the one
+in front of it, and that route is worth $x\cdot y$ or $y \cdot x$, so it
+loses. The four beats close into a cycle, no alternative is unbeaten, and
+$\mathcal{S}(S(x,y)) = \emptyset$. So there is no incomparable pair.
+
+\emph{Meet property.} With selectivity in hand the triangle suffices, on
+three alternatives. Let $m \leq a$ and $m \leq b$ with
+$m \not\leq a\cdot b$, and replace $m$ by $m + a\cdot b$, which still lies
+below $a$ and $b$ but now has $a \cdot b$ strictly below it. The triangle on
+$(a,\, b,\, m + a\cdot b)$ then has all three of its links beating their
+return routes, so its beat relation is a strict cycle and again no
+alternative wins.
+\end{proof}
+
+Four alternatives are needed, not merely convenient. Over the four-element
+diamond lattice, which has the meet property but is not selective, every
+matrix on three alternatives still has a winner; we check this by
+enumerating all $4^{9}$ of them. So no three-alternative witness can force
+selectivity, and the bound in \Cref{thm:winnerchar} is optimal.
+
+\begin{theorem}[Well-formed output]\label{thm:outputchar}
+Let $R$ be a bounded semiring with decidable equality. For $|A| \geq 3$,
+$\succ_M$ is a strict partial order for every $M$, and Schulze's stated
+output, a strict partial order together with a non-empty winner set, is
+delivered for every $M$, if and only if $R$ is selective and has the meet
+property. For $|A| \geq 4$ the same holds of the property that every
+non-winner is beaten by some winner.
+\proofat{algorithm/CharacterisationsN.v}{output\_well\_formed\_\allowbreak characterisation}
+\end{theorem}
+
+\begin{proof}
+Each is squeezed between the two characterisations already proved. A strict
+partial order is in particular transitive, so \Cref{thm:characterisation}
+gives the axioms from the first two, and three alternatives suffice because
+the transitivity component supplies the converse on its own. For the last,
+if every non-winner is beaten by a winner then a winner exists whenever some
+alternative is not one, and refuting it therefore means refuting winner
+existence; that needs the four alternatives of \Cref{thm:winnerchar}.
+\end{proof}
+
+\begin{theorem}[Independence of clones]\label{thm:clonechar}
+Let $R$ be a bounded semiring with decidable equality and let $|A| \geq 5$.
+Then \Cref{thm:clones} holds for every clone replacement if and only if $R$
+is selective and has the meet property. Consequently independence of clones
+and winner existence are the same condition on the carrier.
+\proofat{algorithm/CloneCharacterisationN.v}{clone\_characterisation, clone\_iff\_winner\_exists}
+\end{theorem}
+
+\begin{proof}
+Right to left is \Cref{thm:clones}. For the converse, note that the clone
+hypotheses of \Cref{def:clone} constrain nothing about the links among the
+clones, and go vacuous when the old alternative set is the single
+alternative $d$. There the criterion says exactly that an arbitrary matrix
+on an arbitrary non-empty set of clones has an undefeated element, which is
+winner existence. The square and the triangle of \Cref{thm:winnerchar} can
+therefore be replayed inside the clone set, with the replaced alternative
+parked outside as a node no link leaves; that spare node is why five
+alternatives are asked for rather than four. The equivalence with winner
+existence is then immediate, since both sides characterise the same pair of
+axioms.
+\end{proof}
+
+Independence of clones is the criterion Schulze's method is best known for,
+and in this setting it is not an extra demand at all: a carrier that always
+returns a winner is automatically clone-independent, and conversely.
 
 
 \section{Formal Verification}\label{sec:formalisation}
@@ -731,6 +896,8 @@ others: shortest paths over $\langle \mathbb{N}^{\infty}, \min, +\rangle$,
 widest-shortest paths, which minimise length and break ties by bottleneck
 width, and a product semiring pairing latency with bandwidth that models
 routing across $5$G network slices.
+
+
 
 \section{Related Work}\label{sec:related}
 \subparagraph*{Algebraic path problems.}
