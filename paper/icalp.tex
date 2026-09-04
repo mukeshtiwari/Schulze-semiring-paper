@@ -882,21 +882,115 @@ returns a winner is automatically clone-independent, and conversely.
 
 \section{Formal Verification}\label{sec:formalisation}
 
-Our development is carried out in \rocq{}, and its proofs are constructive,
-so the definitions extract to executable OCaml code that meets the
-specifications proved of them. It runs to some $16{,}000$ lines across $37$
-files. Nothing is admitted and no axiom is assumed.
+Mechanisation does more here than certify the proofs. The hierarchy of
+\Cref{sec:classification} is \emph{enforced} rather than asserted, because
+each theorem carries exactly the algebra its proof consumes and nothing
+else. Neutrality is stated over a bare semiring, so a proof of it cannot
+reach for boundedness; the Level 1 results are stated over a bounded
+semiring with no further hypothesis, so they cannot quietly appeal to
+selectivity; and selectivity and the meet property appear as explicit
+arguments of the theorems that need them. Where the paper claims an axiom
+is not required, that claim is checked by the type checker rather than by
+reading the proof and hoping.
 
-Although our aim is to determine which semiring axioms each of Schulze's
-criteria needs, the formalisation is not confined to that question.
-Everything is parameterised over an arbitrary semiring, so instantiating the
-carrier yields a verified implementation of any problem the same
-construction solves. Besides the Schulze instance we extract and run three
-others: shortest paths over $\langle \mathbb{N}^{\infty}, \min, +\rangle$,
-widest-shortest paths, which minimise length and break ties by bottleneck
-width, and a product semiring pairing latency with bandwidth that models
-routing across $5$G network slices.
+The development is carried out in \rocq{}. It runs to some $20{,}000$ lines,
+nothing is admitted and no axiom is assumed, and the proofs are
+constructive, so the definitions extract to executable OCaml.
 
+\subparagraph*{Three base layers.}
+Every later file, and every example, is stated over three files.
+\rocqfile{algorithm/MatN.v}{MatN.v} builds the matrix semiring over an
+arbitrary carrier: a matrix is a function $A \times A \to R$, addition is
+entrywise, multiplication is the usual $\sum_k M_{ik}\cdot N_{kj}$, and $I$
+carries $1$ on the diagonal. Everything about powers, the geometric sum, and
+their monotonicity lives here.
+\rocqfile{algorithm/PathN.v}{PathN.v} gives the concrete reading of the same
+objects. A path is an explicit list of links, its worth is the product of
+them, and \texttt{path\_star} joins the worths of all paths of length below
+$|A|$ that the enumeration produces. The two views are then identified:
+\[
+  \texttt{path\_star}\ M\ c\ d \;=\; \Mstar_{cd},
+\]
+so a statement proved about powers and geometric sums may be read back as a
+statement about walks, which is how the informal gloss of
+\Cref{sec:prelim} is discharged. The cycle lemmas of the same file are what
+justify stopping at $|A| - 1$: any longer walk repeats an alternative, and
+cutting the repetition out leaves a shorter walk that is at least as good.
+
+\rocqfile{algorithm/SemimoduleN.v}{SemimoduleN.v} supplies the action of a
+matrix on a vector and, with it, the reason the closure deserves the name
+Kleene star. It proves that $\Mstar b$ solves the linear system
+\[
+  x \;=\; M x + b,
+  \qquad
+  M : A \times A \to R,
+  \qquad
+  b, x : A \to U,
+\]
+that it is the \emph{least} such solution, and that under boundedness the
+solution is unique. The vectors are indexed by alternatives but need not
+take their values in $R$: it is enough that they lie in a semimodule $U$ on
+which $R$ acts, which is what the file is named for. These are the standard
+fixed-point facts of the algebraic path problem, and they hold here over an
+arbitrary bounded semiring. The same file proves the efficient form of the action
+agrees with its specification.
+\rocqrelated{\rocqfile{algorithm/SchulzeDefsN.v}{path\_star\_\allowbreak elements\_is\_mat\_star},
+\rocqfile{algorithm/SemimoduleN.v}{kleene\_fixed\_point},
+\rocqfile{algorithm/SemimoduleN.v}{kleene\_fixed\_\allowbreak point\_least}, and
+\rocqfile{algorithm/SemimoduleN.v}{kleene\_fixed\_\allowbreak point\_unique}}
+
+
+\subparagraph*{Matrices as functions, and why that is not enough.}
+Taking a matrix to be a \emph{function} is what makes the theory pleasant:
+two matrices are equal when they agree at every pair, and no bookkeeping
+about lengths or well-formedness ever appears in a statement. It is also
+unusable as a program. Nothing is stored, so evaluating an entry of $M^{k}$
+re-evaluates $M$ along every walk of length $k$ afresh, and no intermediate
+result is ever shared; the cost grows exponentially in $k$, and even a small
+election does not finish.
+
+The development therefore carries a second, tabulated representation.
+\texttt{to\_list} writes a matrix out as a list of rows, \texttt{of\_list}
+reads one back, and \texttt{mul\_list} and \texttt{pow\_list} do the
+arithmetic on the tabulated form, where each entry is computed once and
+reused. Exponentiation is done by repeated squaring on binary numerals, so
+$M^{k}$ costs a logarithmic number of matrix products rather than $k$ of
+them. The two representations are then proved to agree:
+\[
+  \texttt{of\_list}\,(\texttt{pow\_list}\,(\texttt{to\_list}\ M)\ k)_{cd}
+  \;=\; (M^{k})_{cd} .
+\]
+So the statements quantify over functions, where they read cleanly, and the
+extracted program runs on lists, where it is fast, with a theorem saying the
+two never disagree. Nothing in the paper's development has to choose between
+them.
+\rocqrelated{\rocqfile{algorithm/MatN.v}{of\_list\_\allowbreak to\_list},
+\rocqfile{algorithm/MatN.v}{of\_list\_\allowbreak pow\_pos\_list}, and
+\rocqfile{algorithm/MatN.v}{pow\_fun\_\allowbreak powN\_fun\_eqv}}
+
+\subparagraph*{Instances.}
+Because every result is stated over an arbitrary semiring, an instance is
+just a carrier with its two operations and a proof of the axioms.
+\rocqfile{examples/Schulze.v}{Schulze.v} supplies the max-min carrier of
+\Cref{sec:intro} and runs Schulze's own worked example;
+\rocqfile{examples/Shortestpath.v}{Shortestpath.v} and
+\rocqfile{examples/WidestShortestPath.v}{Widest\-Shortest\-Path.v} give shortest
+and widest-shortest paths, and
+\rocqfile{examples/FiveGNetworkSlicing.v}{FiveGNetworkSlicing.v} a product
+of the two that models routing across network slices. Each extracts to
+running OCaml.
+
+\subparagraph*{Beatpaths themselves, not just their strength.}
+One instance is worth describing, because it shows how little the
+construction depends on the numbers.
+\rocqfile{examples/Schulzepath.v}{Schulzepath.v} keeps the alternatives and
+the links but replaces the carrier by \emph{sets of paths}: an element is a
+set of edge sequences, addition is union, multiplication concatenates every
+path of the left set with every path of the right, $0$ is the empty set and
+$1$ the set containing only the empty path. These are the semiring axioms,
+so the same closure applies unchanged, and $\Mstar_{ab}$ is now the set of
+all beatpaths from $a$ to $b$. The strength is recovered afterwards, as the
+best measure of a path in that set.
 
 
 \section{Related Work}\label{sec:related}
