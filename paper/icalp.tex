@@ -4,7 +4,7 @@
 \usepackage{amssymb}
 \usepackage{booktabs}
 \usepackage{tikz}
-\usetikzlibrary{arrows.meta}
+\usetikzlibrary{arrows.meta,decorations.pathreplacing}
 \usepackage{array}
 
 \bibliographystyle{plainurl}
@@ -38,6 +38,7 @@ social choice, interactive theorem proving}
 \newcommand{\rocqfile}[2]{\href{\anonrepo/#1}{\textcolor{blue}{\texttt{#2}}}}
 \newcommand{\proofat}[2]{{\footnotesize\itshape\rocq{} proof: \rocqfile{#1}{#2}}}
 \newcommand{\rocqrelated}[1]{{\footnotesize\itshape Related \rocq{} files: #1}}
+\newcommand{\rowlab}[1]{\textbf{#1}}
 
 \begin{document}
 
@@ -263,6 +264,16 @@ $20{,}000$ lines of \rocq{} proof, is available in an
 
 \end{enumerate}
 
+\subparagraph*{How the paper is arranged.}
+\Cref{sec:prelim} fixes the algebra and \Cref{sec:framework} the beatpath
+construction over it, including the one point at which the closure has to be
+reconciled with what the method actually prescribes.
+\Cref{sec:classification} states the classification and
+\Cref{fig:hierarchy} summarises it. \Cref{sec:characterisation} then proves that the top of the
+hierarchy is exact, and \Cref{sec:sharp} that neither of its two axioms can
+be traded for the other. \Cref{sec:formalisation} describes the \rocq{}
+development.
+
 \section{Background}\label{sec:prelim}
 \subsection{Semirings and the Natural Order}
 
@@ -376,6 +387,36 @@ set of $\succ$-maximal alternatives, the \emph{winners}.
 \proofat{algorithm/SchulzeDefsN.v}{schulze\_beats, schulze\_winner}
 \end{definition}
 
+\begin{example}[The closure breaking a cycle]\label{ex:worked}
+\Cref{ex:tropical} showed the construction failing and tying; it is worth
+seeing it succeed. Take three alternatives whose \emph{direct} comparisons
+form a cycle, $a$ over $b$ at strength $8$, $b$ over $c$ at $6$, and $c$
+over $a$ at $4$, with every other link at $0$. There is no Condorcet winner.
+The closure is
+\[
+  M \;=\;
+  \begin{pmatrix}
+    \infty & 8 & 0 \\
+    0 & \infty & 6 \\
+    4 & 0 & \infty
+  \end{pmatrix},
+  \qquad
+  \Mstar \;=\;
+  \begin{pmatrix}
+    \infty & 8 & 6 \\
+    4 & \infty & 6 \\
+    4 & 4 & \infty
+  \end{pmatrix},
+\]
+since, for instance, $a$ reaches $c$ through $b$ at
+$\min(8,6) = 6$ while $c$ reaches $a$ directly at $4$. Every comparison is
+now strict, $\succ$ is the order $a \succ b \succ c$, and $a$ is the unique
+winner. The weakest link of the cycle, $c \to a$ at $4$, is the one the
+closure discards.
+\proofat{examples/SharpnessWitness.v}{worked\_example\_star,
+worked\_example\_winner}
+\end{example}
+
 The comparison in \Cref{def:succ}, in fact, makes sense over any matrix, and reading
 it on the direct matrix $M$ instead of on the closure gives another 
 relation: $a$ beats $b$ \emph{head to head} when $M_{ba} < M_{ab}$, that is,
@@ -397,7 +438,7 @@ $M_{ab}$ and $M_{ba}$ are read off one pair of counts, and monotonicity and
 independence of clones to how those counts move when ballots change. A
 matrix has discarded all of this, so each such criterion carries the fact
 its proof needs as an explicit hypothesis on $M$, and
-\Cref{tab:classification} marks the ones that do.
+\Cref{fig:hierarchy} marks the ones that do with a dagger.
 
 A reader may reasonably ask whether those hypotheses are doing too much of
 the work. They are not, and a second layer shows why: it derives them
@@ -456,333 +497,62 @@ work than the sketch above suggests, and the machinery for it is the bulk of
 \rocqfile{algorithm/PathN.v}{PathN.v}, at some $3{,}000$ lines the largest
 file in the development.
 
-\subsection{Instances}\label{sec:instances}
-
-\begin{table}[t]
-\centering
-\begin{tabular}{@{}lll@{}}
-\toprule
-Instance & $+$ & $\cdot$ \\
-\midrule
-Margin                 & $\max$ & $\min$ \\
-Winning votes          & $\max$ & $\min$ \\
-Losing votes           & $\max$ & $\min$ \\
-\midrule
-Widest--shortest path  & lexicographic & componentwise \\
-Shortest path          & $\min$ & $+$ \\
-Reachability           & $\vee$ & $\wedge$ \\
-\bottomrule
-\end{tabular}
-\caption{Instances of the framework. The three voting measures differ in
-the underlying total order, not in the operations. The lower block shows that the
-same framework covers standard algebraic-path problems; of these,
-widest--shortest and shortest path are instantiated in the development.}
-\label{tab:instances}
-\end{table}
-
-\Cref{tab:instances} lists the carriers we instantiate. The voting measures
-differ only in \emph{which} total order of strengths is used; the operations are
-identical throughout. That uniformity is an observation the framework makes
-visible, and \Cref{thm:characterisation} will explain that it is forced rather
-than conventional.
-
 
 \section{Which Axiom Does Each Criterion Need?}\label{sec:classification}
 
-\Cref{tab:classification} records, for each criterion, the weakest algebraic
-hypothesis under which we can establish it. The last column marks the
-criteria that additionally carry a condition on the profile. The levels
-stack: each adds one axiom to the one below, and every criterion is proved
-at the lowest level that supports it.
+\Cref{fig:hierarchy} records, for each criterion, the weakest algebraic
+hypothesis under which we can establish it, and marks with a dagger those
+that additionally carry a condition on the profile. The levels stack: each
+adds one axiom to the one below, and every criterion is proved at the lowest
+level that supports it.
 
-The proofs are deferred to \Cref{sec:levels}, because the interesting
-question is not that these hypotheses suffice but that, at the top, nothing
-weaker will do. \Cref{sec:characterisation} shows that the two Level 3
-axioms are exactly what transitivity, winner existence and independence of
-clones cost, and \Cref{sec:sharp} shows that neither axiom can be dropped in
-favour of the other.
+We go through the levels in turn. Throughout, $M$ and $M'$ denote matrices
+over the carrier of the level in question, and $a$, $b$, $x$, $y$ denote
+alternatives. That these hypotheses suffice is only half the story:
+\Cref{sec:characterisation} shows that the two Level 3 axioms are exactly
+what transitivity, winner existence and independence of clones cost, and
+\Cref{sec:sharp} shows that neither axiom can be dropped in favour of the
+other.
 
-\begin{table}[t]
+\begin{figure}[t]
 \centering
-\begin{tabular}{@{}cllc@{}}
-\toprule
-Level & Criterion & Algebraic requirement & Profile \\
-\midrule
-0 & Neutrality                 & none, any semiring       & \\
-\midrule
-1 & Pareto, weak               & bounded                  & $\checkmark$ \\
-1 & Monotonicity               & bounded                  & \\
-\midrule
-2 & Smith criterion            & bounded, selective       & $\checkmark$ \\
-2 & Smith-IIA, weak side       & bounded, selective       & $\checkmark$ \\
-2 & Smith-IIA, strong side     & bounded, selective       & $\checkmark$ \\
-2 & Condorcet consistency      & bounded, selective       & $\checkmark$ \\
-2 & Resolution step            & bounded, selective       & $\checkmark$ \\
-\midrule
-3 & Transitivity of $\succ$    & bounded, selective, meet & \\
-3 & Winner existence           & bounded, selective, meet & \\
-3 & Independence of clones     & bounded, selective, meet & \\
-3 & Reversal symmetry          & bounded, selective, meet & \\
-3 & Prudence                   & bounded, selective, meet & $\checkmark$ \\
-3 & MinMax set                 & bounded, selective, meet & $\checkmark$ \\
-\bottomrule
-\end{tabular}
-\caption{The hierarchy. Each row gives the weakest structure under which we
-can establish the criterion. Levels 0 to 3 stack, each adding to the one
-below.}
-\label{tab:classification}
-\end{table}
+\begin{tikzpicture}[
+  lvl/.style={draw,rounded corners=2pt,minimum width=41mm,minimum height=8mm,
+              align=center,font=\small},
+  ax/.style={font=\footnotesize\itshape},
+  crit/.style={font=\footnotesize,align=left,anchor=west},
+  ar/.style={->,>={Stealth[length=2mm]},thick}]
 
+  \node[lvl,fill=black!3]  (l0) at (0,0)   {Level 0: any semiring};
+  \node[lvl,fill=black!6]  (l1) at (0,1.5) {Level 1: bounded};
+  \node[lvl,fill=black!9]  (l2) at (0,3.0) {Level 2: $+$ selective};
+  \node[lvl,fill=black!12] (l3) at (0,4.5) {Level 3: $+$ meet property};
 
-\section{The Top of the Hierarchy is Exact}\label{sec:characterisation}
+  \draw[ar] (l0) -- node[ax,right=1mm] {$1 + a = 1$} (l1);
+  \draw[ar] (l1) -- node[ax,right=1mm] {$x+y \in \{x,y\}$} (l2);
+  \draw[ar] (l2) -- node[ax,right=1mm] {$a\cdot b = a \sqcap b$} (l3);
 
-\Cref{thm:trans} says selectivity and the meet property suffice. This section
-shows they are necessary, so that the second block of
-\Cref{tab:classification} is not a sufficient condition but a
-characterisation.
+  \node[crit] at (2.6,0)   {neutrality};
+  \node[crit] at (2.6,1.5) {weak Pareto$^{\dagger}$, monotonicity};
+  \node[crit] at (2.6,3.0) {Smith$^{\dagger}$, Smith-IIA$^{\dagger}$ (both sides),\\
+                            Condorcet$^{\dagger}$, resolution step$^{\dagger}$};
+  \node[crit] at (2.6,4.5) {transitivity, winner existence,\\
+                            clones, reversal symmetry,\\
+                            prudence$^{\dagger}$, MinMax$^{\dagger}$};
 
-We first record what the two axioms do to the carrier. They already force
-multiplication to commute (\Cref{lem:commfree}), and in fact they pin both
-operations completely.
+\end{tikzpicture}
+\caption{The hierarchy. Each level adds one axiom to the one below, and
+every criterion is proved at the lowest level that supports it, so a
+criterion at level $k$ is proved from the axioms of levels $0$ to $k$. A
+dagger marks the criteria that carry, in addition, a condition on the
+profile rather than on the carrier. At the top the two axioms are not merely
+sufficient: transitivity, winner existence and independence of clones each
+hold for every profile \emph{precisely} when the carrier is selective and
+has the meet property, which is to say precisely when it is $\max$ and
+$\min$ on a total order.}
+\label{fig:hierarchy}
+\end{figure}
 
-\begin{proposition}[Structure]\label{thm:structure}
-A bounded semiring that is selective and has the meet property is a
-\emph{bottleneck semiring}: its natural order is total, with least element
-$0$ and greatest element $1$; $+$ is the join $\max$ of that order, and
-$\cdot$ is the meet $\min$.
-\proofat{algorithm/SchulzeOrderN.v}{structure\_add\_is\_max,
-structure\_mul\_is\_min}
-\end{proposition}
-
-\begin{proof}
-Selectivity says the order is total, and \Cref{lem:natural}
-identifies its extremes and shows $+$ is the join, which in a total order is
-$\max$. The meet property makes $a\cdot b$ the greatest lower bound, which
-in a total order is $\min$. 
-\end{proof}
-
-
-\begin{theorem}[Transitivity Characterisation]\label{thm:characterisation}
-Let $R$ be a bounded semiring with decidable equality and let $|A| \geq 3$.
-Then
-\[
-  \succ_M \text{ is transitive for every } M
-  \quad\Longleftrightarrow\quad
-  R \text{ is selective and has the meet property,}
-\]
-and hence, by \Cref{thm:structure}, if and only if $R$ is a bottleneck
-semiring.
-\proofat{algorithm/TransitivityN.v}{transitivity\_\allowbreak characterisation}
-\end{theorem}
-
-\begin{proof}
-Right to left is \Cref{thm:trans}. For the converse, assume $\succ_M$ is
-transitive for every $M$ and fix three distinct alternatives $X, Y, Z$.
-
-Everything rests on one construction. For $p, q, r \in R$ let $T(p,q,r)$ be
-the matrix on $\{X,Y,Z\}$ with exactly three links, $X \to Y$ worth $p$,
-$Y \to Z$ worth $q$, and $Z \to X$ worth $r$, and $0$ everywhere else. The
-only route from $Y$ back to $X$ is $Y \to Z \to X$, worth $q \cdot r$, so
-$q \cdot r < p$ makes $X \succ Y$; likewise $r \cdot p < q$ makes
-$Y \succ Z$. Transitivity then forces $X \succ Z$. But the only route from
-$X$ to $Z$ is $X \to Y \to Z$, so the closure entry $T^{\ast}_{XZ}$ is at
-most $p \cdot q$, while the direct link gives $r \leq T^{\ast}_{ZX}$.
-Chaining the three facts,
-\[
-  q \cdot r < p \;\text{ and }\; r \cdot p < q
-  \qquad\Longrightarrow\qquad
-  r < p \cdot q .
-\]
-Call this the \emph{triangle test}. It converts two strict comparisons into
-a third, and both halves of the proof are applications of it.
-
-\emph{Selectivity.} Suppose $x$ and $y$ were incomparable, so neither
-$x \leq y$ nor $y \leq x$. Run the test on $p = x$, $q = y$, $r = x \cdot y$.
-Its premises hold: $y \cdot (x \cdot y)$ lies below $x$, and it cannot equal
-$x$, since it also lies below $y$ and that would give $x \leq y$;
-symmetrically $(x \cdot y) \cdot x$ lies strictly below $y$. The test
-concludes $x \cdot y < x \cdot y$, which is absurd. So no incomparable pair
-exists, and the natural order is total, which is selectivity.
-
-\emph{Meet property.} Let $m \leq a$ and $m \leq b$, and suppose
-$m \not\leq a \cdot b$. Run the test on $p = a$, $q = b$, $r = m$. Its two
-premises ask that $b \cdot m$ lie strictly below $a$ and $m \cdot a$
-strictly below $b$; the non-strict parts are immediate, since
-$b \cdot m \leq m \leq a$ and $m \cdot a \leq m \leq b$. If both are strict
-the test gives $m \leq a \cdot b$, contradicting the supposition. Otherwise
-one of them is an equality. If $b \cdot m = a$ then $a = m$, and running the
-test instead on the triangle $(b, m, m)$ contradicts that equality; the case
-$m \cdot a = b$ is symmetric. So $m \leq a \cdot b$ in every case.
-
-Decidable equality is used only in this direction. Both conclusions are
-decidable statements, and each is reached by refuting its negation.
-\end{proof}
-
-
-
-\begin{theorem}[Winner existence]\label{thm:winnerchar}
-Let $R$ be a bounded semiring with decidable equality and let $|A| \geq 4$.
-Then $\mathcal{S}(M) \neq \emptyset$ for every $M$ if and only if $R$ is
-selective and has the meet property.
-\proofat{algorithm/WinnerexistenceN.v}{winner\_exists\_\allowbreak characterisation}
-\end{theorem}
-
-\begin{proof}
-Right to left is \Cref{thm:trans}. For the converse we need a second
-witness, because the triangle of \Cref{thm:characterisation} cannot do this
-job alone.
-
-\emph{Selectivity.} Suppose $x$ and $y$ are incomparable. Then
-$x \cdot y < y$ and $y \cdot x < x$: each product lies below both factors,
-and equality either way would make $x$ and $y$ comparable. Build the
-\emph{square} $S(x,y)$ on four alternatives $A, B, C, D$, with four links
-$B \to A$ and $D \to C$ worth $x$, and $A \to D$ and $C \to B$ worth $y$,
-and $0$ elsewhere. Each alternative has exactly one route back to the one
-in front of it, and that route is worth $x\cdot y$ or $y \cdot x$, so it
-loses. The four beats close into a cycle, no alternative is unbeaten, and
-$\mathcal{S}(S(x,y)) = \emptyset$. So there is no incomparable pair.
-
-\emph{Meet property.} With selectivity in hand the triangle suffices, on
-three alternatives. Let $m \leq a$ and $m \leq b$ with
-$m \not\leq a\cdot b$, and replace $m$ by $m + a\cdot b$, which still lies
-below $a$ and $b$ but now has $a \cdot b$ strictly below it. The triangle on
-$(a,\, b,\, m + a\cdot b)$ then has all three of its links beating their
-return routes, so its beat relation is a strict cycle and again no
-alternative wins.
-\end{proof}
-
-Four alternatives are needed, not merely convenient. Over the four-element
-diamond lattice, which has the meet property but is not selective, every
-matrix on three alternatives still has a winner; we check this by
-enumerating all $4^{9}$ of them. So no three-alternative witness can force
-selectivity, and the bound in \Cref{thm:winnerchar} is optimal.
-
-\begin{theorem}[Well-formed output]\label{thm:outputchar}
-Let $R$ be a bounded semiring with decidable equality. For $|A| \geq 3$,
-$\succ_M$ is a strict partial order for every $M$, and Schulze's stated
-output, a strict partial order together with a non-empty winner set, is
-delivered for every $M$, if and only if $R$ is selective and has the meet
-property. For $|A| \geq 4$ the same holds of the property that every
-non-winner is beaten by some winner.
-\proofat{algorithm/CharacterisationsN.v}{output\_well\_formed\_\allowbreak characterisation}
-\end{theorem}
-
-\begin{proof}
-Each is squeezed between the two characterisations already proved. A strict
-partial order is in particular transitive, so \Cref{thm:characterisation}
-gives the axioms from the first two, and three alternatives suffice because
-the transitivity component supplies the converse on its own. For the last,
-if every non-winner is beaten by a winner then a winner exists whenever some
-alternative is not one, and refuting it therefore means refuting winner
-existence; that needs the four alternatives of \Cref{thm:winnerchar}.
-\end{proof}
-
-\begin{theorem}[Independence of clones]\label{thm:clonechar}
-Let $R$ be a bounded semiring with decidable equality and let $|A| \geq 5$.
-Then \Cref{thm:clones} holds for every clone replacement if and only if $R$
-is selective and has the meet property. Consequently independence of clones
-and winner existence are the same condition on the carrier.
-\proofat{algorithm/CloneCharacterisationN.v}{clone\_characterisation, clone\_iff\_winner\_exists}
-\end{theorem}
-
-\begin{proof}
-Right to left is \Cref{thm:clones}. For the converse, note that the clone
-hypotheses of \Cref{def:clone} constrain nothing about the links among the
-clones, and go vacuous when the old alternative set is the single
-alternative $d$. There the criterion says exactly that an arbitrary matrix
-on an arbitrary non-empty set of clones has an undefeated element, which is
-winner existence. The square and the triangle of \Cref{thm:winnerchar} can
-therefore be replayed inside the clone set, with the replaced alternative
-parked outside as a node no link leaves; that spare node is why five
-alternatives are asked for rather than four. The equivalence with winner
-existence is then immediate, since both sides characterise the same pair of
-axioms.
-\end{proof}
-
-Independence of clones is the criterion Schulze's method is best known for,
-and in this setting it is not an extra demand at all: a carrier that always
-returns a winner is automatically clone-independent, and conversely.
-
-\section{Sharpness}\label{sec:sharp}
-
-The characterisations of \Cref{sec:classification} say that selectivity and
-the meet property are together necessary. They do not by themselves say that
-each is necessary on its own, nor that the cardinality bounds cannot be
-improved. This section settles both with concrete carriers, each small
-enough to check by hand and each checked by machine.
-
-Two carriers do all the work, and they are chosen so that each drops exactly
-one of the two axioms.
-
-\subparagraph*{The tropical carrier: selective, no meet property.}
-Take $\langle \mathbb{N}^{\infty}, \min, +\rangle$, the shortest-path
-semiring of \Cref{ex:tropical}. Its natural order is total, since $\min$
-always returns one of its arguments, so it is selective. It fails the meet
-property, and the smallest counterexample is the one already visible in the
-introduction: $1$ lies below $1$ twice over, but $1 \cdot 1 = 2$, and in the
-natural order of this carrier $2$ lies strictly below $1$ rather than above
-it. Multiplication is therefore a lower bound of its factors but not the
-greatest one.
-
-That is enough to break the method at three alternatives.
-\Cref{ex:tropical} exhibits the matrix: hops forward round a triangle cost
-$1$, hops back cost $2$, and the closure leaves the asymmetry untouched, so
-$a \succ b \succ c \succ a$ is a cycle of strict wins and no alternative is
-unbeaten. Selectivity alone therefore buys nothing at Level 3, and the meet
-property is genuinely needed.
-\proofat{examples/SharpnessWitness.v}{tropical\_no\_winner\_at\_three}
-
-\subparagraph*{The diamond: meet property, not selective.}
-For the other direction take the four-element lattice
-$\Diam = \{\bot, p, q, \top\}$ in which $p$ and $q$ are incomparable, with
-join for addition and meet for multiplication. Multiplication is by
-construction the greatest lower bound, so the meet property holds. The
-carrier is not selective, because $p + q = \top$ is neither $p$ nor $q$;
-equivalently, $p$ and $q$ are two strengths that cannot be compared.
-
-Here the failure needs a fourth alternative, and that is not an artefact of
-how we searched. Over $\Diam$ \emph{every} matrix on three alternatives has
-a winner. There are $4^{9}$ such matrices, and we check all of them by
-evaluating a boolean winner test, proved sound against $\mathcal{S}$, on a
-tabulation of every one.
-\proofat{examples/SharpnessWitness.v}{diamond\_every\_profile\_has\_winner}
-
-At four alternatives the winner disappears. The square witness of
-\Cref{thm:winnerchar}, instantiated with the incomparable pair $p$ and $q$,
-gives a matrix whose beat relation runs round all four alternatives, so
-again nobody is unbeaten. The meet property alone therefore buys nothing
-either, selectivity is genuinely needed, and the bound of four in
-\Cref{thm:winnerchar} cannot be lowered to three.
-\proofat{examples/SharpnessWitness.v}{diamond\_no\_winner\_at\_four}
-
-\subparagraph*{Level 2 is sharp as well.}
-The same diamond settles the level below. Boundedness and the meet property
-are not enough for any of the Level 2 criteria: over $\Diam$ we exhibit a
-matrix with a clean threshold separating a strong block from a weak one and
-a winner outside the strong block, so the Smith criterion fails; a matrix
-with a Condorcet winner that the closure does not elect; a matrix where an
-untied winner is not unique, so the resolution step fails; and matrices
-refuting both halves of Smith-IIA. Each is a small explicit table, and each
-failure is a direct consequence of two incomparable strengths, which is
-precisely what selectivity forbids.
-\rocqrelated{\rocqfile{examples/SharpnessWitness.v}{smith\_fails\_over\_diamond},
-\rocqfile{examples/SharpnessWitness.v}{condorcet\_fails\_\allowbreak over\_diamond},
-\rocqfile{examples/SharpnessWitness.v}{resolution\_fails\_\allowbreak over\_diamond}, and
-\rocqfile{examples/SharpnessWitness.v}{smith\_iia\_fails\_\allowbreak over\_diamond}}
-
-Taken together the two carriers show that the hierarchy is not an artefact
-of how we happened to write the proofs. Drop selectivity and Level 2 and
-Level 3 both collapse; drop the meet property and Level 3 collapses; and the
-three alternatives that suffice for transitivity provably do not suffice for
-winner existence.
-
-
-
-\section{The Levels in Detail}\label{sec:levels}
-
-This section gives the proofs summarised in \Cref{tab:classification}, level by level. Throughout, $M$ and
-$M'$ denote matrices over the carrier of the level in question, and
-$a$, $b$, $x$, $y$ denote alternatives.
 
 \subsection{Level 0: Any Semiring}
 
@@ -1014,6 +784,10 @@ $\mathcal{S}_{A'}(N) \cap K \neq \emptyset$.
 \end{theorem}
 
 \begin{proof}
+The idea is that a clone set behaves, from outside, exactly like the
+alternative it replaced. Three equalities make that precise, and the rest is
+bookkeeping.
+
 Everything rests on three equalities of chain worths: for all
 $a, b \in A \setminus \{d\}$ and $g \in K$,
 \[
@@ -1063,6 +837,300 @@ closures. The minimum of the cuts is a parameter constrained by hypotheses
 rather than a computed value, because the carrier has joins but no meet
 over the powerset; those constraints are the profile conditions of the two
 rows.
+
+
+
+\section{The Top of the Hierarchy is Exact}\label{sec:characterisation}
+
+\Cref{thm:trans} says selectivity and the meet property suffice. This section
+shows they are necessary, so that the second block of
+the top level of \Cref{fig:hierarchy} is not a sufficient condition but a
+characterisation.
+
+We first record what the two axioms do to the carrier. They already force
+multiplication to commute (\Cref{lem:commfree}), and in fact they pin both
+operations completely.
+
+\begin{proposition}[Structure]\label{thm:structure}
+A bounded semiring that is selective and has the meet property is a
+\emph{bottleneck semiring}: its natural order is total, with least element
+$0$ and greatest element $1$; $+$ is the join $\max$ of that order, and
+$\cdot$ is the meet $\min$.
+\proofat{algorithm/SchulzeOrderN.v}{structure\_add\_is\_max,
+structure\_mul\_is\_min}
+\end{proposition}
+
+\begin{proof}
+Selectivity says the order is total, and \Cref{lem:natural}
+identifies its extremes and shows $+$ is the join, which in a total order is
+$\max$. The meet property makes $a\cdot b$ the greatest lower bound, which
+in a total order is $\min$. 
+\end{proof}
+
+
+\begin{theorem}[Transitivity Characterisation]\label{thm:characterisation}
+Let $R$ be a bounded semiring with decidable equality and let $|A| \geq 3$.
+Then
+\[
+  \succ_M \text{ is transitive for every } M
+  \quad\Longleftrightarrow\quad
+  R \text{ is selective and has the meet property,}
+\]
+and hence, by \Cref{thm:structure}, if and only if $R$ is a bottleneck
+semiring.
+\proofat{algorithm/TransitivityN.v}{transitivity\_\allowbreak characterisation}
+\end{theorem}
+
+\begin{proof}
+Right to left is \Cref{thm:trans}. For the converse, assume $\succ_M$ is
+transitive for every $M$ and fix three distinct alternatives $X, Y, Z$.
+
+Everything rests on one construction. For $p, q, r \in R$ let $T(p,q,r)$ be
+the matrix on $\{X,Y,Z\}$ with exactly three links, $X \to Y$ worth $p$,
+$Y \to Z$ worth $q$, and $Z \to X$ worth $r$, and $0$ everywhere else. The
+only route from $Y$ back to $X$ is $Y \to Z \to X$, worth $q \cdot r$, so
+$q \cdot r < p$ makes $X \succ Y$; likewise $r \cdot p < q$ makes
+$Y \succ Z$. Transitivity then forces $X \succ Z$. But the only route from
+$X$ to $Z$ is $X \to Y \to Z$, so the closure entry $T^{\ast}_{XZ}$ is at
+most $p \cdot q$, while the direct link gives $r \leq T^{\ast}_{ZX}$.
+Chaining the three facts,
+\[
+  q \cdot r < p \;\text{ and }\; r \cdot p < q
+  \qquad\Longrightarrow\qquad
+  r < p \cdot q .
+\]
+Call this the \emph{triangle test}. It converts two strict comparisons into
+a third, and both halves of the proof are applications of it.
+
+\emph{Selectivity.} Suppose $x$ and $y$ were incomparable, so neither
+$x \leq y$ nor $y \leq x$. Run the test on $p = x$, $q = y$, $r = x \cdot y$.
+Its premises hold: $y \cdot (x \cdot y)$ lies below $x$, and it cannot equal
+$x$, since it also lies below $y$ and that would give $x \leq y$;
+symmetrically $(x \cdot y) \cdot x$ lies strictly below $y$. The test
+concludes $x \cdot y < x \cdot y$, which is absurd. So no incomparable pair
+exists, and the natural order is total, which is selectivity.
+
+\emph{Meet property.} Let $m \leq a$ and $m \leq b$, and suppose
+$m \not\leq a \cdot b$. Run the test on $p = a$, $q = b$, $r = m$. Its two
+premises ask that $b \cdot m$ lie strictly below $a$ and $m \cdot a$
+strictly below $b$; the non-strict parts are immediate, since
+$b \cdot m \leq m \leq a$ and $m \cdot a \leq m \leq b$. If both are strict
+the test gives $m \leq a \cdot b$, contradicting the supposition. Otherwise
+one of them is an equality. If $b \cdot m = a$ then $a = m$, and running the
+test instead on the triangle $(b, m, m)$ contradicts that equality; the case
+$m \cdot a = b$ is symmetric. So $m \leq a \cdot b$ in every case.
+
+Decidable equality is used only in this direction. Both conclusions are
+decidable statements, and each is reached by refuting its negation.
+\end{proof}
+
+
+
+\begin{theorem}[Winner existence]\label{thm:winnerchar}
+Let $R$ be a bounded semiring with decidable equality and let $|A| \geq 4$.
+Then $\mathcal{S}(M) \neq \emptyset$ for every $M$ if and only if $R$ is
+selective and has the meet property.
+\proofat{algorithm/WinnerexistenceN.v}{winner\_exists\_\allowbreak characterisation}
+\end{theorem}
+
+\begin{proof}
+Right to left is \Cref{thm:trans}. The converse needs two witnesses rather
+than one: a square on four alternatives for selectivity, and then the
+familiar triangle for the meet property. The triangle alone will not do,
+which is why the bound here is four and not three.
+
+\emph{Selectivity.} Suppose $x$ and $y$ are incomparable. Then
+$x \cdot y < y$ and $y \cdot x < x$: each product lies below both factors,
+and equality either way would make $x$ and $y$ comparable. Build the
+\emph{square} $S(x,y)$ on four alternatives $A, B, C, D$, with four links
+$B \to A$ and $D \to C$ worth $x$, and $A \to D$ and $C \to B$ worth $y$,
+and $0$ elsewhere. Each alternative has exactly one route back to the one
+in front of it, and that route is worth $x\cdot y$ or $y \cdot x$, so it
+loses. The four beats close into a cycle, no alternative is unbeaten, and
+$\mathcal{S}(S(x,y)) = \emptyset$. So there is no incomparable pair.
+
+\emph{Meet property.} With selectivity in hand the triangle suffices, on
+three alternatives. Let $m \leq a$ and $m \leq b$ with
+$m \not\leq a\cdot b$, and replace $m$ by $m + a\cdot b$, which still lies
+below $a$ and $b$ but now has $a \cdot b$ strictly below it. The triangle on
+$(a,\, b,\, m + a\cdot b)$ then has all three of its links beating their
+return routes, so its beat relation is a strict cycle and again no
+alternative wins.
+\end{proof}
+
+Four alternatives are needed, not merely convenient. Over the four-element
+diamond lattice, which has the meet property but is not selective, every
+matrix on three alternatives still has a winner; we check this by
+enumerating all $4^{9}$ of them. So no three-alternative witness can force
+selectivity, and the bound in \Cref{thm:winnerchar} is optimal.
+
+\begin{theorem}[Well-formed output]\label{thm:outputchar}
+Let $R$ be a bounded semiring with decidable equality. For $|A| \geq 3$,
+$\succ_M$ is a strict partial order for every $M$, and Schulze's stated
+output, a strict partial order together with a non-empty winner set, is
+delivered for every $M$, if and only if $R$ is selective and has the meet
+property. For $|A| \geq 4$ the same holds of the property that every
+non-winner is beaten by some winner.
+\proofat{algorithm/CharacterisationsN.v}{output\_well\_formed\_\allowbreak characterisation}
+\end{theorem}
+
+\begin{proof}
+Each is squeezed between the two characterisations already proved. A strict
+partial order is in particular transitive, so \Cref{thm:characterisation}
+gives the axioms from the first two, and three alternatives suffice because
+the transitivity component supplies the converse on its own. For the last,
+if every non-winner is beaten by a winner then a winner exists whenever some
+alternative is not one, and refuting it therefore means refuting winner
+existence; that needs the four alternatives of \Cref{thm:winnerchar}.
+\end{proof}
+
+\begin{theorem}[Independence of clones]\label{thm:clonechar}
+Let $R$ be a bounded semiring with decidable equality and let $|A| \geq 5$.
+Then \Cref{thm:clones} holds for every clone replacement if and only if $R$
+is selective and has the meet property. Consequently independence of clones
+and winner existence are the same condition on the carrier.
+\proofat{algorithm/CloneCharacterisationN.v}{clone\_characterisation, clone\_iff\_winner\_exists}
+\end{theorem}
+
+\begin{proof}
+Right to left is \Cref{thm:clones}. For the converse, note that the clone
+hypotheses of \Cref{def:clone} constrain nothing about the links among the
+clones, and go vacuous when the old alternative set is the single
+alternative $d$. There the criterion says exactly that an arbitrary matrix
+on an arbitrary non-empty set of clones has an undefeated element, which is
+winner existence. The square and the triangle of \Cref{thm:winnerchar} can
+therefore be replayed inside the clone set, with the replaced alternative
+parked outside as a node no link leaves; that spare node is why five
+alternatives are asked for rather than four. The equivalence with winner
+existence is then immediate, since both sides characterise the same pair of
+axioms.
+\end{proof}
+
+Independence of clones is the criterion Schulze's method is best known for,
+and in this setting it is not an extra demand at all: a carrier that always
+returns a winner is automatically clone-independent, and conversely.
+
+\begin{figure}[t]
+\centering
+\begin{tikzpicture}[
+  >={Stealth[length=2mm]},
+  nd/.style={circle,draw,minimum size=6mm,inner sep=0pt,font=\small},
+  fwd/.style={->,thick,bend left=24},
+  bwd/.style={->,densely dashed,gray!70,bend left=7},
+  every node/.style={font=\scriptsize,inner sep=1.5pt,fill=white},
+  capt/.style={font=\small,fill=none,align=center}]
+
+  \begin{scope}
+    \node[nd] (a) at (90:1.25)  {$a$};
+    \node[nd] (b) at (330:1.25) {$b$};
+    \node[nd] (c) at (210:1.25) {$c$};
+    \draw[fwd] (a) to node[auto] {$1$} (b);
+    \draw[fwd] (b) to node[auto] {$1$} (c);
+    \draw[fwd] (c) to node[auto] {$1$} (a);
+    \draw[bwd] (b) to node[auto] {$2$} (a);
+    \draw[bwd] (c) to node[auto] {$2$} (b);
+    \draw[bwd] (a) to node[auto] {$2$} (c);
+    \node[capt] at (0,-2.15) {tropical: selective,\\ no meet property};
+  \end{scope}
+
+  \begin{scope}[xshift=6.4cm]
+    \node[nd] (A) at (135:1.35) {$a$};
+    \node[nd] (B) at (45:1.35)  {$b$};
+    \node[nd] (C) at (315:1.35) {$c$};
+    \node[nd] (D) at (225:1.35) {$d$};
+    \draw[fwd] (A) to node[auto] {$p$} (B);
+    \draw[fwd] (B) to node[auto] {$q$} (C);
+    \draw[fwd] (C) to node[auto] {$p$} (D);
+    \draw[fwd] (D) to node[auto] {$q$} (A);
+    \node[capt] at (0,-2.15) {diamond: meet property,\\ not selective};
+  \end{scope}
+\end{tikzpicture}
+\caption{The two witnesses. Left, over the tropical carrier, forward hops
+cost $1$ and return hops $2$; the closure preserves the asymmetry, so the
+beats form a $3$-cycle and no alternative is unbeaten. Right, over the
+diamond, the incomparable pair $p, q$ alternates round four alternatives and
+again nobody is unbeaten, whereas at three alternatives the diamond always
+produces a winner. Each carrier drops exactly one Level 3 axiom, so neither
+axiom can be dropped in favour of the other.}
+\label{fig:witnesses}
+\end{figure}
+
+\section{Sharpness}\label{sec:sharp}
+
+The characterisations of \Cref{sec:classification} say that selectivity and
+the meet property are together necessary. They do not by themselves say that
+each is necessary on its own, nor that the cardinality bounds cannot be
+improved. This section settles both with concrete carriers, each small
+enough to check by hand and each checked by machine.
+
+Two carriers do all the work, and they are chosen so that each drops exactly
+one of the two axioms.
+
+\subparagraph*{The tropical carrier: selective, no meet property.}
+Take $\langle \mathbb{N}^{\infty}, \min, +\rangle$, the shortest-path
+semiring of \Cref{ex:tropical}. Its natural order is total, since $\min$
+always returns one of its arguments, so it is selective. It fails the meet
+property, and the smallest counterexample is the one already visible in the
+introduction: $1$ lies below $1$ twice over, but $1 \cdot 1 = 2$, and in the
+natural order of this carrier $2$ lies strictly below $1$ rather than above
+it. Multiplication is therefore a lower bound of its factors but not the
+greatest one.
+
+That is enough to break the method at three alternatives
+(\Cref{fig:witnesses}, left).
+\Cref{ex:tropical} exhibits the matrix: hops forward round a triangle cost
+$1$, hops back cost $2$, and the closure leaves the asymmetry untouched, so
+$a \succ b \succ c \succ a$ is a cycle of strict wins and no alternative is
+unbeaten. Selectivity alone therefore buys nothing at Level 3, and the meet
+property is genuinely needed.
+\proofat{examples/SharpnessWitness.v}{tropical\_no\_winner\_at\_three}
+
+\subparagraph*{The diamond: meet property, not selective.}
+For the other direction take the four-element lattice
+$\Diam = \{\bot, p, q, \top\}$ in which $p$ and $q$ are incomparable, with
+join for addition and meet for multiplication. Multiplication is by
+construction the greatest lower bound, so the meet property holds. The
+carrier is not selective, because $p + q = \top$ is neither $p$ nor $q$;
+equivalently, $p$ and $q$ are two strengths that cannot be compared.
+
+Here the failure needs a fourth alternative, and that is not an artefact of
+how we searched. Over $\Diam$ \emph{every} matrix on three alternatives has
+a winner. There are $4^{9}$ such matrices, and we check all of them by
+evaluating a boolean winner test, proved sound against $\mathcal{S}$, on a
+tabulation of every one.
+\proofat{examples/SharpnessWitness.v}{diamond\_every\_profile\_has\_winner}
+
+At four alternatives the winner disappears (\Cref{fig:witnesses}, right).
+The square witness of
+\Cref{thm:winnerchar}, instantiated with the incomparable pair $p$ and $q$,
+gives a matrix whose beat relation runs round all four alternatives, so
+again nobody is unbeaten. The meet property alone therefore buys nothing
+either, selectivity is genuinely needed, and the bound of four in
+\Cref{thm:winnerchar} cannot be lowered to three.
+\proofat{examples/SharpnessWitness.v}{diamond\_no\_winner\_at\_four}
+
+\subparagraph*{Level 2 is sharp as well.}
+The same diamond settles the level below. Boundedness and the meet property
+are not enough for any of the Level 2 criteria: over $\Diam$ we exhibit a
+matrix with a clean threshold separating a strong block from a weak one and
+a winner outside the strong block, so the Smith criterion fails; a matrix
+with a Condorcet winner that the closure does not elect; a matrix where an
+untied winner is not unique, so the resolution step fails; and matrices
+refuting both halves of Smith-IIA. Each is a small explicit table, and each
+failure is a direct consequence of two incomparable strengths, which is
+precisely what selectivity forbids.
+\rocqrelated{\rocqfile{examples/SharpnessWitness.v}{smith\_fails\_over\_diamond},
+\rocqfile{examples/SharpnessWitness.v}{condorcet\_fails\_\allowbreak over\_diamond},
+\rocqfile{examples/SharpnessWitness.v}{resolution\_fails\_\allowbreak over\_diamond}, and
+\rocqfile{examples/SharpnessWitness.v}{smith\_iia\_fails\_\allowbreak over\_diamond}}
+
+Taken together the two carriers show that the hierarchy is not an artefact
+of how we happened to write the proofs. Drop selectivity and Level 2 and
+Level 3 both collapse; drop the meet property and Level 3 collapses; and the
+three alternatives that suffice for transitivity provably do not suffice for
+winner existence.
+
+
 
 \section{Formal Verification}\label{sec:formalisation}
 
