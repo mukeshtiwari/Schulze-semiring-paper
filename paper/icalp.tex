@@ -34,6 +34,10 @@ social choice, interactive theorem proving}
 \newcommand{\Trop}{\mathbb{T}}
 \newcommand{\Diam}{\mathbb{D}}
 \newcommand{\Bool}{\mathbb{B}}
+\newcommand{\anonrepo}{https://anonymous.4open.science/r/Semiring_graph_algorithm-000E}
+\newcommand{\rocqfile}[2]{\href{\anonrepo/#1}{\textcolor{blue}{\texttt{#2}}}}
+\newcommand{\proofat}[2]{{\footnotesize\itshape\rocq{} proof: \rocqfile{#1}{#2}}}
+\newcommand{\rocqrelated}[1]{{\footnotesize\itshape Related \rocq{} files: #1}}
 
 \begin{document}
 
@@ -230,7 +234,7 @@ author nothing and is invisible to the reader. Every entry in our table is
 therefore backed by a \rocq{} proof that typechecks without the hypotheses we
 omit. The full development, more than
 $20{,}000$ lines of \rocq{} proof, is available in an
-\href{https://anonymous.4open.science/r/Semiring_graph_algorithm-000E/README.md}{\textcolor{blue}{anonymous repository}}.
+\href{https://anonymous.4open.science/r/Semiring_graph_algorithm-000E/README.md}{\textcolor{blue}{anonymous proof repository}} and \href{https://anonymous.4open.science/r/Semiring_graph_algorithm-000E/docs/toc.html}{\textcolor{blue}{anonymous documentation repository}}.
 
 \end{enumerate}
 
@@ -259,6 +263,7 @@ $a\leq b$ with $a \neq b$.
 On an idempotent semiring the natural order is a partial order, $+$ is its
 join, and multiplication is monotone in both arguments. If $R$ is bounded then
 $0$ is least, $1$ is greatest, and $a\cdot b \leq a$ and $a\cdot b \leq b$.
+\proofat{algorithm/OrelN.v}{OrelN.v}
 \end{lemma}
 
 \begin{proof}
@@ -330,6 +335,9 @@ and \Cref{sec:walks} shows it computes
 exactly the simple-path optimum the method prescribes. The truncation
 remains meaningful even without boundedness, and the one bare-semiring
 result, neutrality, is a statement about it.
+\rocqrelated{\rocqfile{algorithm/MatN.v}{MatN.v},
+\rocqfile{algorithm/SemimoduleN.v}{SemimoduleN.v}, and
+\rocqfile{algorithm/PathN.v}{PathN.v}}
 
 \section{Beatpath over a Semiring}\label{sec:framework}
 
@@ -340,6 +348,7 @@ For a matrix $M$ over an idempotent semiring put
 \]
 dropping the subscript when $M$ is clear, and write $\mathcal{S}(M)$ for the
 set of $\succ$-maximal alternatives, the \emph{winners}.
+\proofat{algorithm/SchulzeDefsN.v}{schulze\_beats, schulze\_winner}
 \end{definition}
 
 The comparison in \Cref{def:succ}, in fact, makes sense over any matrix, and reading
@@ -430,6 +439,7 @@ Let $\sigma$ be a permutation of $A$ and put
 $M^{\sigma}_{ab} = M_{\sigma a\,\sigma b}$. Then $a \succ_{M^{\sigma}} b$ if
 and only if $\sigma a \succ_{M} \sigma b$, and $a \in \mathcal{S}(M^{\sigma})$
 if and only if $\sigma a \in \mathcal{S}(M)$.
+\proofat{algorithm/NeutralityN.v}{neutrality\_beats, neutrality\_winner}
 \end{theorem}
 
 Neutrality holds over any semiring at all. It reduces to the invariance of a
@@ -453,6 +463,7 @@ $M_{ba} \leq M_{ab}$, and that
 $M_{bx} \leq M_{ax}$ and $M_{xa} \leq M_{xb}$ for every
 $x \notin \{a,b\}$. Then $\Mstar_{ba} \leq \Mstar_{ab}$, and consequently
 $b \in \mathcal{S}(M)$ implies $a \in \mathcal{S}(M)$.
+\proofat{algorithm/ParetoN.v}{pareto\_weaker}
 \end{theorem}
 
 The hypotheses constrain the matrix alone: they say that $a$ dominates $b$
@@ -466,6 +477,7 @@ $x$, and $M_{xy} = M'_{xy}$ whenever $x \neq a$ and $y \neq a$. Then
 $a \succ_M b$ implies $a \succ_{M'} b$, and consequently
 $a \in \mathcal{S}(M)$ implies $a \in \mathcal{S}(M')$: a winner stays a
 winner when it is raised.
+\proofat{algorithm/MonotonicityN.v}{winner\_monotonicity}
 \end{theorem}
 
 Two independence facts drive this. The closure out of $a$ does not depend on
@@ -500,6 +512,7 @@ Let $B_1, B_2$ partition $A$ with $B_1 \neq \emptyset$, and suppose there is
 a strength $c$ with $M_{ba} < c \leq M_{ab}$ for all $a \in B_1$ and
 $b \in B_2$. Then $a \succ b$ for every $a \in B_1$ and $b \in B_2$, and
 every winner lies in $B_1$.
+\proofat{algorithm/SmithN.v}{smith\_criterion\_weaker}
 \end{theorem}
 
 
@@ -512,6 +525,7 @@ $a \in \mathcal{S}_{A \setminus \{d\}}(M)$. Since every winner lies in $B_1$
 by \Cref{thm:smith}, the winner set itself is unchanged. The whole of $B_2$
 may equally be deleted at once: for every $a \in B_1$,
 $a \in \mathcal{S}_{A}(M)$ if and only if $a \in \mathcal{S}_{B_1}(M)$.
+\proofat{algorithm/SmithiiaN.v}{smith\_iia\_removal}
 \end{theorem}
 
 
@@ -523,6 +537,7 @@ separation $c \leq M_{xy} + M_{yx}$ for $x \neq y$ and a unit diagonal on
 $M$. Then deleting any $d \in B_1$ from the ballot leaves the beat relation
 on the weak block unchanged: for all $e, f \in B_2$, \;
 $e \succ^{A}_{M} f$ if and only if $e \succ^{A \setminus \{d\}}_{M} f$.
+\proofat{algorithm/SmithiiaN.v}{smith\_iia\_removal\_strong\_beats}
 \end{theorem}
 
 
@@ -531,6 +546,7 @@ $e \succ^{A}_{M} f$ if and only if $e \succ^{A \setminus \{d\}}_{M} f$.
 Let $a$ be a Condorcet winner of $M$, and suppose that
 $M_{za} < \Mstar_{ax}$ for all $z, x \neq a$ with $z \neq x$. Then
 $a \succ x$ for every $x \neq a$, and hence $\mathcal{S}(M) = \{a\}$.
+\proofat{algorithm/CondorcetN.v}{condorcet\_implies\_strict\_winner\_weaker}
 \end{theorem}
 
 All four theorems have one shape. A threshold $c$ cuts the alternatives into
@@ -573,6 +589,7 @@ to $y$ followed by one from $y$ to $z$ is itself a chain from $x$ to $z$, so
 Over a bounded, selective semiring with the meet property, $\succ$ is
 transitive for every $M$, hence a strict partial order. With decidable
 equality on the carrier in addition, $\mathcal{S}(M) \neq \emptyset$.
+\proofat{algorithm/TransitivityN.v}{schulze\_trans\_weaker\_necessary}
 \end{theorem}
 
 \begin{proof}
@@ -601,6 +618,7 @@ property, and nothing else about the carrier is used.
 
 \begin{lemma}\label{lem:commfree}
 On a bounded semiring the meet property forces $\cdot$ to commute.
+\proofat{algorithm/SchulzeOrderN.v}{mul\_comm\_of\_meet}
 \end{lemma}
 
 \begin{proof}
@@ -629,6 +647,7 @@ Each clone inherits the links of $d$ and the links among survivors are
 untouched; nothing is required of $N_{gh}$ for $g, h \in K$. Both matrices
 carry $1$ on the diagonal, which costs nothing since $M$ and $M \oplus I$
 have the same star.
+\proofat{algorithm/CloneN.v}{CloneN.v}
 \end{definition}
 
 \begin{theorem}[Independence of clones]\label{thm:clones}
@@ -638,6 +657,7 @@ $a \in \mathcal{S}_{A}(M)$ if and only if $a \in \mathcal{S}_{A'}(N)$. If
 the semiring is moreover selective with the meet property and decidable
 equality, then $d \in \mathcal{S}_{A}(M)$ if and only if
 $\mathcal{S}_{A'}(N) \cap K \neq \emptyset$.
+\proofat{algorithm/CloneN.v}{independence\_of\_clones}
 \end{theorem}
 
 \begin{proof}
@@ -682,6 +702,7 @@ cycle, then $a \succ b$, so $b \notin \mathcal{S}(M)$;
 (ii) with decidable equality in addition, if $a$ lies in a cut-minimising
 set and $b$ lies in none, then $a \succ b$, so
 $\mathcal{S}(M) \subseteq \mathfrak{B}_D$.
+\proofat{algorithm/PrudenceN.v}{prudence}
 \end{theorem}
 
 The strongest-cycle strength and the cut strengths are joins over links and
@@ -714,7 +735,20 @@ routing across $5$G network slices.
 \section{Related Work}\label{sec:related}
 \subparagraph*{Algebraic path problems.}
 
+
 \subparagraph*{Algebraic conditions as the price of a guarantee.}
+Asking which algebraic hypothesis buys which property is established in the
+theory of routing metrics~\cite{10.1145/3387514.3405864}. Daggitt, Gurney,
+and Griffin's Agda development of asynchronous convergence for Bellman-Ford
+protocols~\cite{10.1145/3230543.3230561} is the closest methodological
+neighbour: a mechanised, algebra-parameterised account where the hypotheses
+are exactly the price of the guarantee. The same style has reached
+model-theoretic preservation properties~\cite{brinke2026}, and semiring
+provenance is where a construction's dependence on its algebra is studied
+most systematically~\cite{10.1145/1265530.1265535,10.5555/3319379.3319390}.
+Our results have the same shape, with a social choice guarantee in place of
+a protocol or a logic, and with the correspondence closed to an
+equivalence.
 
 \subparagraph*{Mechanised algebra and verified social choice.}
 Kleene algebra has been mechanised as a decision
