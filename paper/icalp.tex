@@ -944,18 +944,15 @@ agrees with its specification.
 Taking a matrix to be a \emph{function} is what makes the theory pleasant:
 two matrices are equal when they agree at every pair, and no bookkeeping
 about lengths or well-formedness ever appears in a statement. It is also
-unusable as a program. Nothing is stored, so evaluating an entry of $M^{k}$
-re-evaluates $M$ along every walk of length $k$ afresh, and no intermediate
-result is ever shared; the cost grows exponentially in $k$, and even a small
-election does not finish.
-
+unusable as a program, because a function memoises nothing. 
 The development therefore carries a second, tabulated representation.
 \texttt{to\_list} writes a matrix out as a list of rows, \texttt{of\_list}
 reads one back, and \texttt{mul\_list} and \texttt{pow\_list} do the
 arithmetic on the tabulated form, where each entry is computed once and
-reused. Exponentiation is done by repeated squaring on binary numerals, so
-$M^{k}$ costs a logarithmic number of matrix products rather than $k$ of
-them. The two representations are then proved to agree:
+reused. Storing the entries is what the functional form could not do, and it
+is what makes squaring pay: a product of tabulated matrices costs
+$O(n^{3})$, and repeated squaring needs $O(\log k)$ of them, so the whole
+closure costs $O(n^{3}\log k)$. The two representations are then proved to agree:
 \[
   \texttt{of\_list}\,(\texttt{pow\_list}\,(\texttt{to\_list}\ M)\ k)_{cd}
   \;=\; (M^{k})_{cd} .
@@ -995,6 +992,23 @@ best measure of a path in that set.
 
 \section{Related Work}\label{sec:related}
 \subparagraph*{Algebraic path problems.}
+Carr\'e~\cite{carre1971algebra} and Lehmann~\cite{lehmann1977} showed that
+transitive closure, shortest paths, and widest paths are one algorithm over
+different semirings, and Gondran and Minoux~\cite{10.5555/1386688} and Baras
+and Theodorakopoulos~\cite{baras2022path} developed the
+idea. Mohri~\cite{10.5555/639508.639512},
+Dolan~\cite{10.1145/2500365.2500613} and Droste and
+Kuich~\cite{Droste2009} are standard modern presentations. That literature
+asks when the series converges and how to compute it
+efficiently~\cite{vassilevska2009all}, not when the values may be
+\emph{compared}, which is the question a voting rule puts to it. Bottleneck
+semirings are classical, going back to Cuninghame-Green's minimax
+algebra~\cite{cuninghamegreen1979minimax}. On the computational side,
+Sornat, Vassilevska Williams, and Xu~\cite{sornat2021schulze} give
+fine-grained bounds for computing Schulze winners via a reduction to
+all-pairs bottleneck paths; \Cref{thm:structure} explains why bottleneck
+paths are not one reduction among many but the only shape the problem can
+take.
 
 
 \subparagraph*{Algebraic conditions as the price of a guarantee.}
@@ -1026,6 +1040,27 @@ That work verifies a particular procedure at a fixed carrier. Our concern is
 complementary: it asks how much algebraic structure a property costs. 
 
 \section{Conclusion}\label{sec:conclusion}
+Interpreting social choice axioms over a bounded semiring turns a flat list
+of guarantees into a hierarchy, and the hierarchy is exact at the top. The
+two structural guarantees (that the outcome is an ordering, and that a
+winner exists) are each \emph{equivalent} to selectivity with the meet
+property, hence to the carrier being $\max$ and $\min$ on a total order.
+Schulze's arithmetic is a consequence of the guarantees, not a modelling
+choice. Alongside the algebra, several criteria carry profile conditions
+that no carrier can discharge. Independence of clones cannot be stated over a
+fixed finite type of alternatives, but parameterising the closure by a list
+removes that obstruction, and the criterion then joins the hierarchy at the
+same level and turns out to be equivalent to winner existence rather than
+merely to need the same algebra. The same closure also gives Smith-IIA in its
+genuine removal form, on both sides of the cut: deleting the non-Smith
+alternatives from the ballot, one at a time or all at once, and equally
+deleting a Smith alternative, rather than neutralising them in the matrix.
+The two operations agree because an alternative with no links is exactly one
+that a closure over a sublist can ignore. It also settles the size of the
+clone characterisation: five alternatives are optimal, because over the
+diamond the clone criterion holds outright at four. One question remains
+open: whether width is the exact boundary for counterexamples at three
+alternatives.
 
 
 \bibliography{ref,icalp}
