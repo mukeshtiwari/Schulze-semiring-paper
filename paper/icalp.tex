@@ -13,11 +13,18 @@
 
 \titlerunning{How Much Algebra Does a Beatpath Need?}
 
-\author{First Author}{Institution, Country}{first@example.org}{}{}
-%\author{Second Author}{Institution, Country}{second@example.org}{}{}
-%\authorrunning{F. Author and S. Author}
+\author{Mina Cyrus}{Department of Computer Science, Swansea University,
+  Swansea, UK}{m.a.cyrus@swansea.ac.uk}{}{}
+%\author{Dirk Pattinson}{Department of Computer Science, Australian National
+%  University, Canberra, Australia}{dirk.pattinson@anu.edu.au}{}{}
+%\author{Nobuko Yoshida}{Department of Computer Science, University of
+%  Oxford, Oxford, UK}{nobuko.yoshida@cs.ox.ac.uk}{}{}
+%\author{Mukesh Tiwari}{Department of Computer Science, Swansea University,
+%  Swansea, UK}{mukesh.tiwari@swansea.ac.uk}{}{}
 
-%\Copyright{First Author and Second Author}
+\authorrunning{M. Cyrus, D. Pattinson, N. Yoshida, and M. Tiwari}
+
+\Copyright{Mina Cyrus, Dirk Pattinson, Nobuko Yoshida, and Mukesh Tiwari}
 
 \ccsdesc[500]{Theory of computation~Algebraic semantics}
 \ccsdesc[300]{Theory of computation~Logic and verification}
@@ -45,77 +52,72 @@ social choice, interactive theorem proving}
 \maketitle
 
 \begin{abstract}
+The Schulze method is a widely used single-winner election method based on
+\emph{beatpaths}. One alternative beats another when the strongest path
+from the first to the second is stronger than the strongest path back,
+where the strength of a path is the strength of its weakest link. The
+matrix of strongest paths is the Kleene star of the pairwise matrix over
+the semiring $\langle \mathbb{N}^{\infty}, \max, \min\rangle$, so every
+one of Schulze's guarantees is a theorem about that semiring.
 
+We interpret those guarantees over an arbitrary semiring and ask, for each
+one, which algebraic axioms its proof uses. They sort into four levels.
+Neutrality holds over any semiring. The Pareto condition and monotonicity
+need only \emph{boundedness}, that $1 + a = 1$. The Smith criterion and
+Condorcet consistency need in addition \emph{selectivity}, that $x + y$ is
+always $x$ or $y$, and each fails without it. The criteria that compose two
+beatpaths need in addition the \emph{meet property}, that $a \cdot b$ is
+the greatest lower bound of $a$ and $b$. Reversal symmetry, in its
+relation-level form, sits outside the hierarchy: it needs only
+commutativity.
 
-The Schulze method is a widely used single-winner election method rule based on \emph{beatpaths}. One alternative beats 
-another when the strongest path from one to the other is stronger than the strongest 
-path in the opposite direction. Since the strength of a path is determined by its weakest 
-link, this can be expressed using the Kleene star of a matrix over the 
-semiring \(\langle \mathbb{N}^{\infty}, \max, \min\rangle\). 
-Schulze's guarantees, such as neutrality, monotonicity, pareto, etc.,  
-are therefore theorems about that semiring.
-
-We interpret those guarantees over an arbitrary semiring and ask: 
-for each guarantee, which algebraic axioms its proof consumes. 
-They sort into five levels. At
-the bottom is neutrality, which holds over any semiring at all. The Pareto
-condition and monotonicity are proved from \emph{boundedness} alone, that
-$1 + a = 1$. The Smith criterion and Condorcet consistency are proved from \emph{boundedness} together with \emph{selectivity},
-that $x+y$ is always $x$ or $y$, and each of them fails without selectivity.
-The criteria that compose two beatpaths use in addition a
-\emph{meet property}, that $a\cdot b$ is the greatest lower bound of $a$ and
-$b$. 
-
-At the top the converses hold as well. Over a bounded semiring with
+At the top level the converse holds as well. Over a bounded semiring with
 decidable equality, the beatpath relation is transitive for every profile
-exactly when the carrier is selective and has the meet property, and that is
-exactly when it is $\max$ and $\min$ on a total order. These two operations
-are therefore not one choice among several: no others guarantee an ordering.
-All that stays free is the scale the strengths are measured on, which may be
-any total order. The same two axioms characterise winner existence and
-independence of clones, and the latter two turn out to be the same condition
-on the carrier.
-
+exactly when the semiring is selective and has the meet property, and a
+semiring with both is $\max$ and $\min$ on a total order. Schulze's two
+operations are therefore the only ones that guarantee an ordering; the only
+freedom left is the totally ordered scale on which strengths are measured.
+The same two axioms characterise winner existence and independence of
+clones, so those two guarantees are the same condition on the semiring.
+Every result is machine-checked in \rocq{}.
 \end{abstract}
 
 \section{Introduction}\label{sec:intro}
 The Schulze method~\cite{schulze2011new} ranks alternatives by
 \emph{beatpaths}. From a profile of ballots, one derives a matrix $M$ of
-pairwise link strengths. A chain $a = c_0, c_1, \dots, c_k = b$ is worth its
-weakest link, and alternative $a$ outranks $b$ when the best chain from $a$
-to $b$ beats the best chain from $b$ to $a$. Here best means $\max$ and
-worth means $\min$. The matrix of best chains is then exactly the Kleene
-star
+pairwise link strengths. A path $a = c_0, c_1, \dots, c_k = b$ has the
+strength of its weakest link, and alternative $a$ outranks $b$ when the
+strongest path from $a$ to $b$ beats the strongest path from $b$ to $a$.
+Here strongest means $\max$ and weakest means $\min$. The matrix of
+strongest paths is then exactly the Kleene star
 \[
   \Mstar \;=\; I \oplus M \oplus M^{2} \oplus \cdots
 \]
-of $M$ over the semiring $\langle \mathbb{N}^{\infty}, \max, \min\rangle$.
-The method's output follows from the comparison
+of $M$ over the semiring $\langle \mathbb{N}^{\infty}, \max, \min\rangle$,
+and the method's output follows from the comparison
 \[
   a \succ b \quad\text{iff}\quad \Mstar_{ba} < \Mstar_{ab}
 \]
 taken in that semiring's natural order.
 
-
-Now change the arithmetic,  from $\langle \mathbb{N}^{\infty}, \max, \min\rangle$ to 
-$\langle \mathbb{N}^{\infty}, \min, +\rangle$, and keep everything else. 
-Let a chain be worth the
-\emph{sum} of its links instead of the weakest, and let the best chain be the
-shortest one. Then $\Mstar$ holds shortest distances, and $a \succ b$ says
-that $a$ reaches $b$ more cheaply than $b$ reaches $a$. Only the two
-operations have moved, and three alternatives are already enough to make the
-method fail.
+Now change the arithmetic from $\langle \mathbb{N}^{\infty}, \max,
+\min\rangle$ to $\langle \mathbb{N}^{\infty}, \min, +\rangle$ and keep
+everything else. A path now has the \emph{sum} of its links as its
+strength, read as a cost, and the best path is the cheapest one. Then
+$\Mstar$ holds shortest distances, and $a \succ b$ says that $a$ reaches
+$b$ more cheaply than $b$ reaches $a$. Only the two operations have
+changed, and three alternatives are already enough to make the method
+fail.
 
 \begin{example}[One profile, two semirings]\label{ex:tropical}
 Take three alternatives and three voters ranking them cyclically: one votes
 $a > b > c$, one votes $b > c > a$, and one votes $c > a > b$. Pairwise, $a$
 beats $b$ two votes to one, $b$ beats $c$ two to one, and $c$ beats $a$ two
 to one, so the majority relation is a cycle and there is no Condorcet
-winner. Every method built on pairwise comparisons must say something about
-this profile.
+winner.
 
-Over $\langle \mathbb{N}^{\infty}, \max, \min\rangle$, let $M_{ij}$ be
-the number of voters ranking $i$ above $j$, with rows and columns indexed
+Over $\langle \mathbb{N}^{\infty}, \max, \min\rangle$, let $M_{ij}$ be the
+number of voters ranking $i$ above $j$, with rows and columns indexed
 $a,b,c$ and $0$ on the diagonal:
 \[
   M \;=\;
@@ -132,149 +134,120 @@ $a,b,c$ and $0$ on the diagonal:
     2 & 2 & \infty
   \end{pmatrix}.
 \]
-The closure lifts every losing direction to the winning one. The direct link
-from $b$ to $a$ is worth only $1$, but the detour $b \to c \to a$ is worth
-$\min(2,2) = 2$, which matches the direct link from $a$ to $b$; the other
-two pairs behave the same way. Every entry of $\Mstar$ is therefore $2$, no
-comparison $\Mstar_{ba} < \Mstar_{ab}$ is strict, and $\succ$ is empty. No
-alternative beats another, so all three are winners.
+The direct link from $b$ to $a$ has strength $1$, but the detour
+$b \to c \to a$ has strength $\min(2,2) = 2$, which matches the direct link
+from $a$ to $b$; the other two pairs behave the same way. Every
+off-diagonal entry of $\Mstar$ is therefore $2$, no comparison
+$\Mstar_{ba} < \Mstar_{ab}$ is strict, and $\succ$ is empty. No alternative
+beats another, so all three are winners.
 
 Now keep the profile and change the semiring to $\langle \mathbb{N}^{\infty},
-\min, +\rangle$, reading a link as a cost rather than a strength and
-charging each link the opposition to it, $N_{ij} = M_{ji}$. Each hop along
-$a \to b \to c \to a$ then costs $1$ and each reverse hop costs $2$:
-\[
-  N \;=\;
-  \begin{pmatrix}
-    \infty & 1 & 2 \\
-    2 & \infty & 1 \\
-    1 & 2 & \infty
-  \end{pmatrix},
-  \qquad
-  N^{\ast} \;=\;
-  \begin{pmatrix}
-    0 & 1 & 2 \\
-    2 & 0 & 1 \\
-    1 & 2 & 0
-  \end{pmatrix}.
-\]
-This time the closure changes nothing off the diagonal. The detour
-$b \to c \to a$ costs $1 + 1 = 2$, no better than the direct hop back, so
-the cheapest route from $b$ to $a$ costs $2$, while the direct hop from $a$
-to $b$ costs $1$. So $a \succ b$, and
-by symmetry $b \succ c$ and $c \succ a$: the cycle survives the closure as a
-cycle of \emph{strict} wins, every alternative is beaten by another, and the
-winner set is empty.
+\min, +\rangle$, charging each link the number of voters opposed to it, so
+that each hop forward round the cycle $a \to b \to c \to a$ costs $1$ and
+each hop back costs $2$. The detour from $b$ to $a$ now costs $1 + 1 = 2$,
+no better than the direct hop back, so the cheapest route from $b$ to $a$
+costs $2$ while the direct hop from $a$ to $b$ costs $1$, and $a \succ b$.
+By symmetry $b \succ c$ and $c \succ a$. The cycle survives the closure as
+a cycle of \emph{strict} wins, every alternative is beaten by another, and
+the winner set is empty.
 \end{example}
 
 The two halves of \Cref{ex:tropical} run the same ballots through the same
-construction and disagree completely. The guarantee that Schulze's
-method returns an ordering with a winner therefore does not come from the
-beatpath idea alone; it comes from $\max$ and $\min$. This is one 
-guarantee and Schulze's method has many
-others. Raising a candidate's support never harms it (monotonicity). A
-candidate who beats every other head to head is always elected (Condorcet
-consistency). Every winner comes from the smallest set of candidates that
-beats everyone outside it (the Smith criterion). And there are several more.
-
+construction and disagree completely. The guarantee that Schulze's method
+returns an ordering with a winner therefore does not come from the beatpath
+idea alone; it comes from $\max$ and $\min$. That is one guarantee, and
+Schulze's method has many others. Raising a candidate's support never harms
+it (monotonicity). A candidate who beats every other head to head is always
+elected (Condorcet consistency). Every winner comes from the smallest set
+of candidates that beats everyone outside it (the Smith criterion). And
+there are several more.
 
 It has long been known that the closure construction itself is generic:
 transitive closure, shortest paths, and widest paths are all instances of
 one algorithm run over different
 semirings~\cite{carre1971algebra,lehmann1977,10.5555/1386688,baras2022path}.
 To our knowledge, though, social choice theory has never been carried to
-that same level of generality. That is our subject. For each of Schulze's
+that same level of generality. This paper does so. For each of Schulze's
 guarantees we ask the same question: which algebraic axioms does its proof
 actually need?
 
 \subparagraph*{Our contributions.}
-Interpreting the social choice theory over a semiring
-turns each of Schulze's criteria into a statement about that semiring. Each
-such statement then survives or fails depending on the axioms the carrier
+Interpreting the social choice theory over a semiring turns each of
+Schulze's criteria into a statement about that semiring. Each such
+statement then holds or fails depending on the axioms the semiring
 satisfies, so the criteria stop being a flat list and acquire a structure.
-Describing that structure takes four definitions: (i) \emph{idempotence},
-(ii) \emph{boundedness}, (iii) \emph{selectivity}, and (iv) the \emph{meet
-property}. Our contributions are the following.
+Describing that structure takes four definitions: \emph{idempotence},
+\emph{boundedness}, \emph{selectivity}, and the \emph{meet property}. Our
+contributions are the following.
 
 \begin{enumerate}
 \item \textbf{A classification of Schulze's criteria by algebraic strength}
-(\Cref{sec:classification}). We prove each criterion at the weakest level of
-structure at which we can establish it, and those levels form a four-step
-hierarchy and each level adds one axiom to the previous one. 
-\begin{itemize}
-\item \textbf{Level 0, no assumptions.} Neutrality holds for every
-semiring.
-\item \textbf{Level 1, boundedness.} Weak Pareto and monotonicity.
-\item \textbf{Level 2, boundedness and selectivity.} The Smith criterion,
-Smith-IIA (Smith independence of irrelevant alternatives), Condorcet consistency, 
-and the resolvability proof.
-\item \textbf{Level 3, boundedness, selectivity, and the meet property.}
-Transitivity of $\succ$, existence of a winner, independence of clones,
-the winner-level form of reversal symmetry, prudence, and the MinMax set.
-\end{itemize}
-
+(\Cref{sec:classification}). We prove each criterion at the weakest level
+of structure at which we can establish it. The levels form a hierarchy in
+which each adds one axiom to the one below: neutrality needs no assumption
+at all (Level 0); weak Pareto and monotonicity need boundedness (Level 1);
+the Smith criterion, Smith-IIA, Condorcet consistency, and the resolution
+step need selectivity in addition (Level 2); and transitivity of $\succ$,
+winner existence, independence of clones, reversal symmetry, prudence, and
+the MinMax set need the meet property in addition (Level 3).
+\Cref{tab:classification} summarises the classification.
 
 \item \textbf{An exact characterisation at Level 3}
-(\Cref{thm:characterisation}). The two axioms of Level 3 are not merely
-enough for transitivity; they are exactly what it costs. Over a bounded
-semiring with decidable equality and at least three alternatives, $\succ$ is
-transitive for every matrix if and only if the carrier is selective and has
-the meet property, and a carrier with both is $\max$ and $\min$ on a total
-order (\Cref{thm:structure}). Schulze's two operations are therefore not one
-workable choice among several. They are the only one, and the only freedom
-left is which totally ordered scale the strengths are drawn from.
+(\Cref{sec:characterisation}). The two axioms of Level 3 are not merely
+enough; they are exactly what transitivity costs. Over a bounded semiring
+with decidable equality and at least three alternatives, $\succ$ is
+transitive for every matrix if and only if the semiring is selective and
+has the meet property, and a semiring with both is $\max$ and $\min$ on a
+total order (\Cref{thm:structure}). Schulze's two operations are therefore
+not one workable choice among several: they are the only one, and the only
+freedom left is which totally ordered scale the strengths are drawn from.
+The same two axioms characterise winner existence
+(\Cref{thm:winnerchar}) and independence of clones (\Cref{thm:clonechar}),
+so on any semiring those two guarantees stand or fall together.
 
-\item \textbf{The same characterisation for winner existence}
-(\Cref{thm:winnerchar}). Those same two axioms are exactly what it costs to
-guarantee that some alternative is unbeaten. Four alternatives are needed
-here rather than three, and four is optimal: over the four-element diamond
-lattice, which has the meet property but is not selective, every matrix on
-three alternatives still has a winner, so no three-alternative witness could
-force selectivity.
-
-\item \textbf{Independence of clones, and its equivalence with winner
-existence} (\Cref{thm:clonechar}). Clone independence is the criterion
-Schulze's method is best known for, and it too is characterised by the same
-two axioms. It follows that on any carrier the two guarantees stand or fall
-together: a carrier that always returns a winner is automatically
-clone-independent, and one that is clone-independent always returns a
-winner.
-
-
-\item \textbf{Sharpness of the classification} (\Cref{sec:sharp}). Each
-axiom is necessary on its own, not merely jointly. The tropical carrier is
-selective but lacks the meet property, and already at three alternatives it
-admits a matrix with no winner. The four-element diamond has the meet
-property but is not selective, and it admits one at four; over the diamond
-every matrix on three alternatives still has a winner, checked by
-enumerating all $4^{9}$ of them, so the bound of four is optimal. The
-diamond also refutes every Level 2 criterion, which is what makes that level
-sharp too.
-
+\item \textbf{Sharpness} (\Cref{sec:sharp}). Each axiom is necessary on
+its own, not merely jointly. The tropical semiring is selective but lacks
+the meet property, and already at three alternatives it admits a matrix
+with no winner. The four-element diamond lattice has the meet property but
+is not selective, and it admits one at four alternatives but, as a machine
+check of all $4^{9}$ cases shows, at no fewer. The diamond also refutes
+every Level 2 criterion, so that level is sharp too.
 
 \item \textbf{A complete mechanisation} in \rocq{}
-(\Cref{sec:formalisation}). A classification by \emph{weakest} hypothesis is
-a claim about what a proof does \emph{not} use. Informal argument gets
-exactly this kind of claim wrong, because an unused hypothesis costs the
-author nothing and is invisible to the reader. Every entry in our table is
-therefore backed by a \rocq{} proof that typechecks without the hypotheses we
-omit. The full development, more than
-$20{,}000$ lines of \rocq{} proof, is available in an
-\href{https://anonymous.4open.science/r/Semiring_graph_algorithm-000E/README.md}{\textcolor{blue}{anonymous proof repository}} and \href{https://anonymous.4open.science/r/Semiring_graph_algorithm-000E/docs/toc.html}{\textcolor{blue}{anonymous documentation repository}}.
-
+(\Cref{sec:formalisation}). A classification by \emph{weakest} hypothesis
+is a claim about what a proof does \emph{not} use, and informal argument
+gets exactly this kind of claim wrong, because an unused hypothesis costs
+the author nothing and is invisible to the reader. Every entry in our table
+is therefore backed by a \rocq{} proof that typechecks without the
+hypotheses we omit. The full development, more than $20{,}000$ lines of
+\rocq{}, is available in an
+\href{https://anonymous.4open.science/r/Semiring_graph_algorithm-000E/README.md}{\textcolor{blue}{anonymous proof repository}} with
+\href{https://anonymous.4open.science/r/Semiring_graph_algorithm-000E/docs/toc.html}{\textcolor{blue}{documentation}}.
 \end{enumerate}
 
 \subparagraph*{How the paper is arranged.}
 \Cref{sec:prelim} fixes the algebra and \Cref{sec:framework} the beatpath
-construction over it, including the one point at which the closure has to be
-reconciled with what the method actually prescribes.
-\Cref{sec:classification} states the classification and
-\Cref{fig:hierarchy} summarises it. \Cref{sec:characterisation} then proves that the top of the
-hierarchy is exact, and \Cref{sec:sharp} that neither of its two axioms can
-be traded for the other. \Cref{sec:formalisation} describes the \rocq{}
-development.
+construction over it, including the one point at which the closure has to
+be reconciled with what the method actually prescribes.
+\Cref{sec:classification} states the classification.
+\Cref{sec:characterisation} proves that the top of the hierarchy is exact
+and that neither of its two axioms can be traded for the other.
+\Cref{sec:formalisation} describes the \rocq{} development,
+\Cref{sec:related} places the work beside the algebraic path and verified
+social choice literature, and \Cref{sec:conclusion} concludes.
 
 \section{Background}\label{sec:prelim}
+
+Two ingredients are needed before any criterion can be stated. The first
+is the semiring: it supplies the two operations that combine link
+strengths, and its \emph{natural order} is what turns those strengths into
+comparisons, so that saying one beatpath is stronger than another means
+something. The second is the closure: matrices over a semiring form a
+semiring in their own right, and the Kleene star of a matrix collects the
+strengths of all paths at once. Neither is new, and the reader who knows
+the algebraic path problem will recognise both; we set them out because
+the whole paper turns on which of their axioms each later proof uses.
+
 \subsection{Semirings and the Natural Order}
 
 \begin{definition}[Semiring]
@@ -313,8 +286,8 @@ the other side.
 \end{proof}
 
 The last clause separates this setting from arbitrary semirings: here
-multiplication only loses strength. That is the right reading when a product
-is the worth of a composite chain, and it fails in
+multiplication only loses strength. That is the right reading when a
+product is the strength of a composite path, and it fails in
 $\langle \mathbb{N}, +, \times\rangle$, which is therefore out of scope.
 
 \begin{definition}[Selectivity, meet property]\label{def:sel-meet}
@@ -343,34 +316,37 @@ series
 \]
 \end{definition}
 
-Entrywise, $(M^{k})_{ij}$ joins the worths of all walks of length exactly
-$k$ from $i$ to $j$, so $\Mstar_{ij}$ joins the worths of all walks from
-$i$ to $j$, of every length. In a general semiring this join is an
-infinite sum and need not exist; over $\langle \mathbb{N}, +,
-\times\rangle$ the powers simply grow.
+Entrywise, $(M^{k})_{ij}$ joins the strengths of all walks of length
+exactly $k$ from $i$ to $j$, so $\Mstar_{ij}$ joins the strengths of all
+walks from $i$ to $j$, of every length. (A \emph{walk} may revisit an
+alternative; a \emph{path} may not. \Cref{sec:walks} shows the distinction
+does not matter here.) In a general semiring this join is an infinite sum
+and need not exist; over $\langle \mathbb{N}, +, \times\rangle$ the powers
+simply grow.
+
 Boundedness is what brings the series to a fixed point. Over a bounded
-semiring, a walk of length $n$ or more revisits some vertex, and cutting
-out the cycle between the two visits leaves a shorter walk of at least the
-same worth, because products only lose strength (\Cref{lem:natural}).
-Every power beyond $M^{n-1}$ is therefore dominated by the earlier ones
-and adds nothing to the join. The series stabilises at stage $n-1$,
+semiring, a walk of length $n$ or more revisits some alternative, and
+cutting out the cycle between the two visits leaves a shorter walk of at
+least the same strength, because products only lose strength
+(\Cref{lem:natural}). Every power beyond $M^{n-1}$ is therefore dominated
+by the earlier ones and adds nothing to the join, so the series stabilises
+at stage $n-1$:
 \[
   \Mstar \;=\; I \oplus M \oplus M^{2} \oplus \cdots \oplus M^{n-1}
-  \;=\; (M \oplus I)^{n-1},
+  \;=\; (M \oplus I)^{n-1}.
 \]
-where the second equality uses idempotence: expanding $(M \oplus I)^{n-1}$
-by distributivity produces each $M^{k}$ many times over, and $a + a = a$
-merges the duplicates. The development takes this truncated sum as the
-definition of the closure. That is not a compromise but the
-standard definition in the algebraic path literature, where the closure
-over a suitably stable semiring is obtained at a finite
-power~\cite{carre1971algebra,lehmann1977}. The name is not merely conventional:
-the truncation satisfies $\Mstar = I \oplus (M \otimes \Mstar)$, the
-defining equation of the Kleene star for matrices, 
-and \Cref{sec:walks} shows it computes
-exactly the simple-path optimum the method prescribes. The truncation
-remains meaningful even without boundedness, and the one bare-semiring
-result, neutrality, is a statement about it.
+The second equality uses idempotence: expanding $(M \oplus I)^{n-1}$ by
+distributivity produces each $M^{k}$ many times over, and $a + a = a$
+merges the duplicates.
+
+The development takes this truncated sum as the definition of the closure.
+That is the standard definition in the algebraic path literature, where
+the closure over a suitably stable semiring is obtained at a finite
+power~\cite{carre1971algebra,lehmann1977}, and the name Kleene star is
+earned: the truncation satisfies $\Mstar = I \oplus (M \otimes \Mstar)$,
+the defining equation of the star for matrices. The truncation remains
+meaningful even without boundedness, and the one bare-semiring result,
+neutrality, is a statement about it.
 \rocqrelated{\rocqfile{algorithm/MatN.v}{MatN.v},
 \rocqfile{algorithm/SemimoduleN.v}{SemimoduleN.v}, and
 \rocqfile{algorithm/PathN.v}{PathN.v}}
@@ -383,7 +359,11 @@ For a matrix $M$ over an idempotent semiring put
   a \succ_M b \quad\text{iff}\quad \Mstar_{ba} < \Mstar_{ab},
 \]
 dropping the subscript when $M$ is clear, and write $\mathcal{S}(M)$ for the
-set of $\succ$-maximal alternatives, the \emph{winners}.
+set of $\succ$-maximal alternatives, the \emph{winners}. Two criteria
+compare elections held on different sets of alternatives, so for
+$B \subseteq A$ we also write $\clo{M}{B}$ for the closure of $M$
+restricted to the alternatives in $B$, and $\succ^{B}_{M}$ and
+$\mathcal{S}_{B}(M)$ for the relation and the winners it induces.
 \proofat{algorithm/SchulzeDefsN.v}{schulze\_beats, schulze\_winner}
 \end{definition}
 
@@ -438,7 +418,7 @@ $M_{ab}$ and $M_{ba}$ are read off one pair of counts, and monotonicity and
 independence of clones to how those counts move when ballots change. A
 matrix has discarded all of this, so each such criterion carries the fact
 its proof needs as an explicit hypothesis on $M$, and
-\Cref{fig:hierarchy} marks the ones that do with a dagger.
+\Cref{tab:classification} marks the ones that do.
 
 A reader may reasonably ask whether those hypotheses are doing too much of
 the work. They are not, and a second layer shows why: it derives them
@@ -449,21 +429,21 @@ prefer $b$ to $a$. Any way of turning that pair of counts into a strength
 will do, provided it meets two conditions of Schulze's: more support with no
 more opposition makes a link stronger, and a win counts for more than a tie,
 a tie for more than a loss. Winning votes, margins, and losing votes all
-qualify. For each criterion the layer derives its hypotheses on $M$ from the
-premise Schulze states about ballots, so the results apply to actual
-elections and not only to abstract matrices.
+qualify. For each of these criteria the layer derives its hypotheses on
+$M$ from the premise Schulze states about ballots, so the results apply to
+actual elections and not only to abstract matrices.
+
 
 \subsection{Paths, not Walks}\label{sec:walks}
 
 One thing about $\Mstar$ still needs checking: that it computes what the
-method prescribes. At first sight it does not. Schulze takes the best
-\emph{simple path}, a route that visits no alternative twice, with no bound
-on its length. The power $M^{k}$ instead joins over \emph{walks} of length
-exactly $k$, routes that may revisit alternatives and run round self-loops,
-and $\Mstar$ cuts the sum off at length $n-1$. The two mismatches are that
-$\Mstar$ ranges over the wrong objects, walks rather than simple paths, and
-stops at the wrong length, $n-1$ rather than unbounded. Neither turns out to
-matter.
+method prescribes. Schulze takes the strongest \emph{simple path}, a route
+that visits no alternative twice, with no bound on its length. The power
+$M^{k}$ instead joins over \emph{walks} of length exactly $k$, routes that
+may revisit alternatives, and $\Mstar$ cuts the sum off at length $n-1$.
+So $\Mstar$ appears to range over the wrong objects and to stop at the
+wrong length. The next proposition shows that neither difference changes
+the result.
 
 \begin{proposition}\label{prop:walks}
 Over a bounded semiring, for all $a,b$ the join over all walks from $a$ to $b$
@@ -477,81 +457,85 @@ at most once, so it has
 at most $n-1$ edges and is therefore one of the walks joined in $W$. Hence
 $P \leq W$, and the truncation at $n-1$ discards no simple path.
 
-For the other direction, take a walk from $a$ to $b$. If it repeats a vertex
-then it contains a cycle, and deleting that cycle leaves a shorter walk with
-the same endpoints. The deletion cannot decrease the value: a product is
-below each of its factors (\Cref{lem:natural}), so discarding factors moves
-the value up or leaves it fixed. Each deletion shortens the walk, so the
-process terminates, and it can only stop at a walk with no repeated vertex,
-which is a simple path. Every walk is therefore dominated by some simple
-path, giving $W \leq P$. The two joins are equal by antisymmetry.
+For the other direction, take a walk from $a$ to $b$. If it repeats an
+alternative then it contains a cycle, and deleting that cycle leaves a
+shorter walk with the same endpoints. The deletion cannot decrease the
+strength: a product is below each of its factors (\Cref{lem:natural}), so
+discarding factors moves the strength up or leaves it fixed. Each deletion
+shortens the walk, so the process terminates, and it can only stop at a
+walk with no repeated alternative, which is a simple path. Every walk is
+therefore dominated by some simple path, giving $W \leq P$. The two joins
+are equal by antisymmetry.
 \proofat{algorithm/PathN.v}{reduce\_path\_\allowbreak into\_elem\_path\_gen}
 \end{proof}
 
 Boundedness is what makes the argument go through, and idempotence on its
 own would not be enough: without $a \cdot b \leq a$ a cycle can raise a
-walk's value, and then $\Mstar$ is simply not the join over paths. The
-result is proved rather than assumed. Cutting a cycle out of a walk and
-knowing that the process terminates in a simple path is a good deal more
-work than the sketch above suggests, and the machinery for it is the bulk of
+walk's strength, and then $\Mstar$ is not the join over paths. In the
+mechanisation, cutting a cycle out of a walk and showing that the process
+terminates in a simple path is a good deal more work than the sketch above
+suggests; the machinery for it is the bulk of
 \rocqfile{algorithm/PathN.v}{PathN.v}, at some $3{,}000$ lines the largest
 file in the development.
 
 
 \section{Which Axiom Does Each Criterion Need?}\label{sec:classification}
 
-\Cref{fig:hierarchy} records, for each criterion, the weakest algebraic
-hypothesis under which we can establish it, and marks with a dagger those
-that additionally carry a condition on the profile. The levels stack: each
-adds one axiom to the one below, and every criterion is proved at the lowest
-level that supports it.
+\Cref{tab:classification} records, for each criterion, the weakest
+algebraic hypothesis under which we can establish it. The levels stack:
+each adds one axiom to the one below, and every criterion is proved at the
+lowest level that supports it. The last column marks the criteria whose
+theorem carries, besides the axioms of its level, a hypothesis on the
+matrix $M$ that no choice of semiring can supply. For all but the last two
+rows that hypothesis is the matrix-level residue of a fact Schulze states
+about ballots, and the ballot layer of \Cref{sec:framework} derives it
+from that ballot-level premise.
 
 We go through the levels in turn. Throughout, $M$ and $M'$ denote matrices
-over the carrier of the level in question, and $a$, $b$, $x$, $y$ denote
-alternatives. That these hypotheses suffice is only half the story:
-\Cref{sec:characterisation} shows that the two Level 3 axioms are exactly
-what transitivity, winner existence and independence of clones cost, and
-\Cref{sec:sharp} shows that neither axiom can be dropped in favour of the
-other.
+over a semiring of the level in question, and $a$, $b$, $x$, $y$ denote
+alternatives. That these hypotheses suffice is only half the story;
+\Cref{sec:characterisation} shows that at the top level they are also
+necessary.
 
-\begin{figure}[t]
+\begin{table}[t]
 \centering
-\begin{tikzpicture}[
-  lvl/.style={draw,rounded corners=2pt,minimum width=41mm,minimum height=8mm,
-              align=center,font=\small},
-  ax/.style={font=\footnotesize\itshape},
-  crit/.style={font=\footnotesize,align=left,anchor=west},
-  ar/.style={->,>={Stealth[length=2mm]},thick}]
-
-  \node[lvl,fill=black!3]  (l0) at (0,0)   {Level 0: any semiring};
-  \node[lvl,fill=black!6]  (l1) at (0,1.5) {Level 1: bounded};
-  \node[lvl,fill=black!9]  (l2) at (0,3.0) {Level 2: $+$ selective};
-  \node[lvl,fill=black!12] (l3) at (0,4.5) {Level 3: $+$ meet property};
-
-  \draw[ar] (l0) -- node[ax,right=1mm] {$1 + a = 1$} (l1);
-  \draw[ar] (l1) -- node[ax,right=1mm] {$x+y \in \{x,y\}$} (l2);
-  \draw[ar] (l2) -- node[ax,right=1mm] {$a\cdot b = a \sqcap b$} (l3);
-
-  \node[crit] at (2.6,0)   {neutrality};
-  \node[crit] at (2.6,1.5) {weak Pareto$^{\dagger}$, monotonicity};
-  \node[crit] at (2.6,3.0) {Smith$^{\dagger}$, Smith-IIA$^{\dagger}$ (both sides),\\
-                            Condorcet$^{\dagger}$, resolution step$^{\dagger}$};
-  \node[crit] at (2.6,4.5) {transitivity, winner existence,\\
-                            clones, reversal symmetry,\\
-                            prudence$^{\dagger}$, MinMax$^{\dagger}$};
-
+\setlength{\tabcolsep}{6pt}\renewcommand{\arraystretch}{1.15}
+\begin{tikzpicture}
+\node[draw=black!35,rounded corners=3pt,line width=0.5pt,
+      inner sep=7pt,fill=black!2] {%
+\begin{tabular}{@{}cllc@{}}
+\toprule
+\textbf{Level} & \textbf{Criterion} & \textbf{Algebraic requirement} & \textbf{Hyp.\ on $M$} \\
+\midrule
+\textbf{0} & Neutrality                 & none, any semiring       & \\[1pt]
+\midrule
+\textbf{1} & Pareto, weak               & bounded                  & $\checkmark$ \\
+           & Monotonicity               & bounded                  & \\[1pt]
+\midrule
+\textbf{2} & Smith criterion            & bounded, selective       & $\checkmark$ \\
+           & Smith-IIA, weak side       & bounded, selective       & $\checkmark$ \\
+           & Smith-IIA, strong side     & bounded, selective       & $\checkmark$ \\
+           & Condorcet consistency      & bounded, selective       & $\checkmark$ \\
+           & Resolution step            & bounded, selective       & $\checkmark$ \\[1pt]
+\midrule
+\textbf{3} & Transitivity of $\succ$    & bounded, selective, meet & \\
+           & Winner existence           & bounded, selective, meet & \\
+           & Independence of clones     & bounded, selective, meet & \\
+           & Reversal symmetry          & bounded, selective, meet & \\
+           & Prudence                   & bounded, selective, meet & $\checkmark$ \\
+           & MinMax set                 & bounded, selective, meet & $\checkmark$ \\
+\bottomrule
+\end{tabular}};
 \end{tikzpicture}
-\caption{The hierarchy. Each level adds one axiom to the one below, and
-every criterion is proved at the lowest level that supports it, so a
-criterion at level $k$ is proved from the axioms of levels $0$ to $k$. A
-dagger marks the criteria that carry, in addition, a condition on the
-profile rather than on the carrier. At the top the two axioms are not merely
-sufficient: transitivity, winner existence and independence of clones each
-hold for every profile \emph{precisely} when the carrier is selective and
-has the meet property, which is to say precisely when it is $\max$ and
-$\min$ on a total order.}
-\label{fig:hierarchy}
-\end{figure}
+\caption{The criteria and their levels. Each row gives the weakest
+structure under which we can establish the criterion; levels $0$ to $3$
+stack, each adding one axiom to the one below. A tick in the last column
+marks a criterion whose theorem also carries a hypothesis on the matrix
+$M$ rather than on the semiring; except for prudence and the MinMax set,
+the ballot layer derives that hypothesis from a premise about ballots. At
+Level 3 the two axioms are also necessary (\Cref{sec:characterisation}).}
+\label{tab:classification}
+\end{table}
 
 
 \subsection{Level 0: Any Semiring}
@@ -566,20 +550,19 @@ if and only if $\sigma a \in \mathcal{S}(M)$.
 \proofat{algorithm/NeutralityN.v}{neutrality\_beats, neutrality\_winner}
 \end{theorem}
 
-Neutrality holds over any semiring at all. It reduces to the invariance of a
-finite sum under a permutation of the index set, and the closure then
-respects that permutation term by term. It needs neither boundedness nor
-idempotence, and it is the only criterion we prove at the bare semiring
-level.
+Neutrality reduces to the invariance of a finite sum under a permutation
+of the index set: the closure respects the permutation term by term. It
+needs neither boundedness nor idempotence, and it is the only criterion we
+prove at the bare semiring level.
 
 \subsection{Level 1: Boundedness}
 
 Two criteria need boundedness, $1 + a = 1$, and nothing beyond it. By
-\Cref{lem:natural} it forces $a \cdot b \leq a$ and $a \cdot b \leq b$, so a
-chain is never worth more than any of its links. Both proofs below rest on
-the two consequences: the series closes at $M^{n-1}$, so bounding a closure
-entry means bounding every power, and the closure is monotone in the matrix,
-so raising an entry of $M$ lowers no entry of $\Mstar$.
+\Cref{lem:natural} it forces $a \cdot b \leq a$ and $a \cdot b \leq b$, so
+a path is never stronger than any of its links. Both proofs below rest on
+two consequences: the series closes at $M^{n-1}$, so bounding a closure
+entry means bounding every power, and the closure is monotone in the
+matrix, so raising an entry of $M$ lowers no entry of $\Mstar$.
 
 \begin{theorem}[Weak Pareto]\label{thm:pareto}
 Let $a \neq b$, let $M$ have diagonal $1$, and suppose
@@ -590,9 +573,10 @@ $b \in \mathcal{S}(M)$ implies $a \in \mathcal{S}(M)$.
 \proofat{algorithm/ParetoN.v}{pareto\_weaker}
 \end{theorem}
 
-The hypotheses constrain the matrix alone: they say that $a$ dominates $b$
-head to head and against every third alternative, which is a condition on
-the profile rather than on the carrier.
+The hypotheses say that $a$ dominates $b$ head to head and against every
+third alternative. They constrain the matrix, not the semiring, and the
+ballot layer derives them from the premise that every voter ranks $a$ at
+least as high as $b$.
 
 \begin{theorem}[Monotonicity]\label{thm:monotone}
 Let $M'$ be obtained from $M$ by raising $a$'s row and lowering $a$'s
@@ -615,7 +599,7 @@ along
   (M')^{\ast}_{ab},
 \]
 where $a \succ_M b$ supplies the strict middle step; a tie would leave it
-non-strict and the chain would conclude nothing. The winner clause applies
+non-strict and the chain of inequalities would conclude nothing. The winner clause applies
 the same two facts to each rival in turn. All of this concerns $a$ alone:
 raising $a$ may unseat some other winner, and indeed
 $\mathcal{S}(M') \subseteq \mathcal{S}(M)$.
@@ -625,11 +609,21 @@ $\mathcal{S}(M') \subseteq \mathcal{S}(M)$.
 \subsection{Level 2: Selectivity}
 
 Selectivity, $x + y \in \{x,y\}$, is exactly totality of the natural order.
-It buys one move, and every criterion at this level uses it: turning
-\emph{$b$ does not beat $a$} into \emph{$a$ beats $b$}. Under a partial
-order these are not complementary, since $\Mstar_{ab}$ and $\Mstar_{ba}$ may
-be incomparable and neither alternative beat the other. Under a total order
-one of the two comparisons must hold, so a proof may split on which.
+It licenses one inference, and every criterion at this level uses it:
+from \emph{$b$ does not beat $a$} to \emph{$a$ beats $b$}. Under a partial
+order these are not complementary, since $\Mstar_{ab}$ and $\Mstar_{ba}$
+may be incomparable and neither alternative beat the other. Under a total
+order one of the two comparisons must hold, so a proof may split on which.
+
+The first four theorems have one shape. A threshold $c$ cuts the
+alternatives into a strong block and a weak one: every link from strong to
+weak reaches $c$, and every link back falls short of it. Selectivity
+converts that gap between direct links into a strict comparison of closure
+entries, which is what \Cref{def:succ} reads as a win. The threshold is
+Schulze's tie strength, since a victory outranks a tie and a tie outranks
+a defeat. No construction on the semiring can supply it, because it turns
+on $M_{ab}$ and $M_{ba}$ being read off one pair of counts; the ballot
+layer discharges it.
 
 \begin{theorem}[Smith criterion]\label{thm:smith}
 Let $B_1, B_2$ partition $A$ with $B_1 \neq \emptyset$, and suppose there is
@@ -639,32 +633,37 @@ every winner lies in $B_1$.
 \proofat{algorithm/SmithN.v}{smith\_criterion\_weaker}
 \end{theorem}
 
+The two halves of Smith-IIA differ in which block is disturbed. Both carry
+the auxiliary hypothesis $c \leq M_{xy} + M_{yx}$, which says that for
+every pair the stronger of its two directions reaches the threshold.
 
-\begin{theorem}[Smith-IIA]\label{thm:smithiia}
-Under the hypotheses of \Cref{thm:smith}, together with a separation
-$c \leq M_{xy} + M_{yx}$ for $x \neq y$ and a unit diagonal on $M$, deleting
-any $d \in B_2$ from the ballot leaves the winner status of every $a \in B_1$
+\begin{theorem}[Smith-IIA, weak side]\label{thm:smithiia}
+Under the hypotheses of \Cref{thm:smith}, together with
+$c \leq M_{xy} + M_{yx}$ for $x \neq y$ and a unit diagonal on $M$,
+deleting any $d \in B_2$ leaves the winner status of every $a \in B_1$
 unchanged: $a \in \mathcal{S}_{A}(M)$ if and only if
-$a \in \mathcal{S}_{A \setminus \{d\}}(M)$. Since every winner lies in $B_1$
-by \Cref{thm:smith}, the winner set itself is unchanged. The whole of $B_2$
-may equally be deleted at once: for every $a \in B_1$,
+$a \in \mathcal{S}_{A \setminus \{d\}}(M)$. Since every winner lies in
+$B_1$ by \Cref{thm:smith}, the winner set itself is unchanged. The whole of
+$B_2$ may equally be deleted at once: for every $a \in B_1$,
 $a \in \mathcal{S}_{A}(M)$ if and only if $a \in \mathcal{S}_{B_1}(M)$.
 \proofat{algorithm/SmithiiaN.v}{smith\_iia\_removal}
 \end{theorem}
 
-
-
 \begin{theorem}[Smith-IIA, strong side]\label{thm:smithiiastrong}
 Let $B_1, B_2$ partition $A$, and suppose there is a strength $c$ with
-$M_{ba} < c$ for all $a \in B_1$ and $b \in B_2$, together with the
-separation $c \leq M_{xy} + M_{yx}$ for $x \neq y$ and a unit diagonal on
-$M$. Then deleting any $d \in B_1$ from the ballot leaves the beat relation
-on the weak block unchanged: for all $e, f \in B_2$, \;
+$M_{ba} < c$ for all $a \in B_1$ and $b \in B_2$, together with
+$c \leq M_{xy} + M_{yx}$ for $x \neq y$ and a unit diagonal on $M$. Then
+deleting any $d \in B_1$ leaves the beat relation on the weak block
+unchanged: for all $e, f \in B_2$, \;
 $e \succ^{A}_{M} f$ if and only if $e \succ^{A \setminus \{d\}}_{M} f$.
 \proofat{algorithm/SmithiiaN.v}{smith\_iia\_removal\_strong\_beats}
 \end{theorem}
 
-
+Deleting a weak alternative leaves the winner status of every strong one
+alone, so the election may as well have been run on $B_1$ from the start.
+Deleting a strong alternative leaves the beat relation among the weak
+ones alone, and needs only the one-sided cut $M_{ba} < c$, since nothing
+about the links out of $B_1$ bears on comparisons inside $B_2$.
 
 \begin{theorem}[Condorcet consistency]\label{thm:condorcet}
 Let $a$ be a Condorcet winner of $M$, and suppose that
@@ -673,37 +672,39 @@ $a \succ x$ for every $x \neq a$, and hence $\mathcal{S}(M) = \{a\}$.
 \proofat{algorithm/CondorcetN.v}{condorcet\_implies\_strict\_winner\_weaker}
 \end{theorem}
 
-All four theorems have one shape. A threshold $c$ cuts the alternatives into
-a strong block and a weak one: every link from strong to weak reaches $c$,
-and every link back falls short of it. Selectivity converts that gap between
-raw links into a strict comparison of closure entries, which is what
-\Cref{def:succ} reads as a win. \Cref{thm:condorcet} is the case
-$B_1 = \{a\}$, with the cut written directly as $M_{za} < \Mstar_{ax}$, and
-there the conclusion sharpens to uniqueness: a lone strong alternative beats
-every other, so no other can survive.
+This is the case $B_1 = \{a\}$ of the Smith criterion, with the cut written
+directly as $M_{za} < \Mstar_{ax}$, and there the conclusion sharpens to
+uniqueness: a lone strong alternative beats every other, so no other can
+survive.
 
-The two halves of Smith-IIA differ in which block is disturbed. Deleting a
-weak alternative (\Cref{thm:smithiia}) leaves the winner status of every
-strong one alone, so the winner set is untouched and the election may as
-well have been run on $B_1$ from the start. Deleting a strong alternative
-(\Cref{thm:smithiiastrong}) instead leaves the beat relation among the weak
-ones alone, and needs only the one-sided cut $M_{ba} < c$, since nothing
-about the links out of $B_1$ bears on comparisons inside $B_2$. Both carry
-the auxiliary hypothesis $c \leq M_{xy} + M_{yx}$, which says that for every
-pair the stronger of its two directions reaches the threshold.
+The last theorem at this level is the step that Schulze's resolvability
+argument turns on. Resolvability asks that ties be rare, and the step says
+that a winner with no ties in the closure is the only winner. That
+pairwise distinct link strengths force such a winner is a further result,
+proved at Level 3
+(\rocqfile{algorithm/CriticalLinkN.v}{distinct\_links\_unique\_winner}),
+and the ballot layer lifts both to profiles.
 
-None of these hypotheses constrains the carrier; each constrains the
-profile. The threshold is Schulze's tie strength, since a victory outranks a
-tie and a tie outranks a defeat. No construction on the carrier can supply
-it, because it turns on $M_{ab}$ and $M_{ba}$ being read off one pair of
-counts, and it is the ballot layer that discharges it.
+\begin{theorem}[Resolution step]\label{thm:resolution}
+Let $a \in \mathcal{S}(M)$ with $\Mstar_{ab} \neq \Mstar_{ba}$ for every
+$b \neq a$. Then $a \succ b$ for every $b \neq a$, and hence
+$\mathcal{S}(M) = \{a\}$.
+\proofat{algorithm/ResolvabilityN.v}{untied\_winner\_unique}
+\end{theorem}
+
+\begin{proof}
+By selectivity either $\Mstar_{ba} \leq \Mstar_{ab}$ or
+$\Mstar_{ab} \leq \Mstar_{ba}$. The second, with the entries distinct,
+would be $b \succ a$, contradicting $a \in \mathcal{S}(M)$; so the first
+holds, and with the entries distinct it is $a \succ b$.
+\end{proof}
 
 \subsection{Level 3: The Meet Property}
 The criteria whose proofs compose two beatpaths end to end need the meet
 property in addition. A bound on $\Mstar_{ab}$ and a bound on $\Mstar_{bc}$
 must be combined into a bound on their product, and only the meet property
-does that. One fact about the closure is used throughout: a chain from $x$
-to $y$ followed by one from $y$ to $z$ is itself a chain from $x$ to $z$, so
+does that. One fact about the closure is used throughout: a path from $x$
+to $y$ followed by one from $y$ to $z$ is itself a path from $x$ to $z$, so
 \[
   \Mstar_{xy}\cdot\Mstar_{yz} \;\leq\; \Mstar_{xz}
   \qquad \text{for all } x,y,z.
@@ -712,7 +713,7 @@ to $y$ followed by one from $y$ to $z$ is itself a chain from $x$ to $z$, so
 \begin{theorem}[Transitivity]\label{thm:trans}
 Over a bounded, selective semiring with the meet property, $\succ$ is
 transitive for every $M$, hence a strict partial order. With decidable
-equality on the carrier in addition, $\mathcal{S}(M) \neq \emptyset$.
+equality on the semiring in addition, $\mathcal{S}(M) \neq \emptyset$.
 \proofat{algorithm/TransitivityN.v}{schulze\_trans\_weaker\_necessary}
 \end{theorem}
 
@@ -731,14 +732,14 @@ If $m = \Mstar_{bc}$, the same argument with the letters shifted gives
 $\Mstar_{bc} \leq \Mstar_{ca}\cdot\Mstar_{ab} \leq \Mstar_{cb}$,
 contradicting $b \succ c$. The two products are taken in opposite orders,
 so commutativity is never needed. Finally, a strict partial order on a
-finite set has a maximal element; constructively one finds it by deciding
-comparisons between closure entries, which is where decidable equality
-enters.
+finite set has a maximal element; to find one constructively we must
+decide comparisons between closure entries, and that is the only use of
+decidable equality.
 \end{proof}
 
 This is Schulze's own argument: his case split is selectivity, his
-identification of a composite chain's worth with its weaker half is the meet
-property, and nothing else about the carrier is used.
+identification of a composite path's strength with its weaker half is the
+meet property, and nothing else about the semiring is used.
 
 \begin{lemma}\label{lem:commfree}
 On a bounded semiring the meet property forces $\cdot$ to commute.
@@ -755,9 +756,7 @@ Commutativity is therefore not an independent axiom of the hierarchy: any
 criterion whose hypotheses contain the meet property has it for free.
 
 Independence of clones compares two elections over different alternative
-sets, so we write $\clo{M}{B}$ for the closure of $M$ restricted to the
-alternatives in $B$, and $\succ^{B}_{M}$ and $\mathcal{S}_{B}(M)$ for the
-relation and winners it induces.
+sets, using the restricted notation of \Cref{def:succ}.
 
 \begin{definition}[Clone replacement]\label{def:clone}
 Let $d \in A$, let $K \neq \emptyset$ be fresh alternatives disjoint from
@@ -768,8 +767,9 @@ $a, b \in A \setminus \{d\}$ and $g \in K$,
   N_{ga} = M_{da}, \qquad N_{ag} = M_{ad}, \qquad N_{ab} = M_{ab}.
 \]
 Each clone inherits the links of $d$ and the links among survivors are
-untouched; nothing is required of $N_{gh}$ for $g, h \in K$. Both matrices carry $1$ on the diagonal, which costs
-nothing since $M$ and $M \oplus I$ have the same star.
+untouched; nothing is required of $N_{gh}$ for $g, h \in K$. Both matrices
+carry $1$ on the diagonal, which costs nothing since $M$ and $M \oplus I$
+have the same star.
 \proofat{algorithm/CloneN.v}{CloneN.v}
 \end{definition}
 
@@ -785,25 +785,22 @@ $\mathcal{S}_{A'}(N) \cap K \neq \emptyset$.
 
 \begin{proof}
 The idea is that a clone set behaves, from outside, exactly like the
-alternative it replaced. Three equalities make that precise, and the rest is
-bookkeeping.
-
-Everything rests on three equalities of chain worths: for all
-$a, b \in A \setminus \{d\}$ and $g \in K$,
+alternative it replaced. Three equalities of closure entries make that
+precise: for all $a, b \in A \setminus \{d\}$ and $g \in K$,
 \[
   \clo{N}{A'}_{ab} = \clo{M}{A}_{ab}, \qquad
   \clo{N}{A'}_{ag} = \clo{M}{A}_{ad}, \qquad
   \clo{N}{A'}_{ga} = \clo{M}{A}_{da}.
 \]
-Each is proved by antisymmetry, transporting chains in both directions:
+Each is proved by antisymmetry, transporting paths in both directions:
 from old to new, rename $d$ to a fixed clone $g$; from new to old, rename
-every clone to $d$. The image chain has its link strengths recomputed in the
-target matrix, so it is a chain by construction and only a link-by-link
+every clone to $d$. The image path has its link strengths recomputed in
+the target matrix, so it is a path by construction and only a link-by-link
 comparison remains. Crossings between $K$ and the survivors are equalities
-by \Cref{def:clone}. A chain that enters $K$ and leaves it again is
+by \Cref{def:clone}. A path that enters $K$ and leaves it again is
 collapsed onto $d$, where the recomputed link is $M_{dd} = 1$, which
-dominates whatever the clones did among themselves; this is the only use of
-boundedness.
+dominates whatever the clones did among themselves; this is the only use
+of boundedness.
 
 The first clause follows from the equalities alone: a survivor $b$ beats
 $a$ in one election exactly when it does in the other, and a clone $g$
@@ -815,12 +812,15 @@ order, so the finite non-empty set $K$ has a maximal element, which is a
 winner.
 \end{proof}
 
-Two further criteria sit at this level, each carrying a profile condition.
-\emph{Prudence} demands that a link stronger than every directed cycle be
-respected by the output. The \emph{MinMax set} $\mathfrak{B}_D$ is the
-union of the proper non-empty subsets of $A$ whose strongest entering link
-is weakest; Schulze regards always electing from it as the most
-characteristic property of his method.
+Two further criteria sit at this level. \emph{Prudence} demands that a
+link stronger than every directed cycle be respected by the output; the
+strength of the strongest directed cycle is the join, over all links
+$a \to b$, of $M_{ab} \cdot \Mstar_{ba}$. The \emph{MinMax set} is
+Schulze's most characteristic property. For a non-empty proper subset
+$B \subset A$, the \emph{cut} into $B$ is the join of the links $M_{xb}$
+with $x \notin B$ and $b \in B$, that is, the strongest link entering $B$.
+A set is \emph{cut-minimising} if no other has a strictly weaker cut, and
+the MinMax set $\mathfrak{B}$ is the union of the cut-minimising sets.
 
 \begin{theorem}[Prudence and the MinMax set]\label{thm:prudminmax}
 Over a bounded, selective semiring with the meet property:
@@ -828,26 +828,68 @@ Over a bounded, selective semiring with the meet property:
 cycle, then $a \succ b$, so $b \notin \mathcal{S}(M)$;
 (ii) with decidable equality in addition, if $a$ lies in a cut-minimising
 set and $b$ lies in none, then $a \succ b$, so
-$\mathcal{S}(M) \subseteq \mathfrak{B}_D$.
+$\mathcal{S}(M) \subseteq \mathfrak{B}$.
 \proofat{algorithm/PrudenceN.v}{prudence}
 \end{theorem}
 
-The strongest-cycle strength and the cut strengths are joins over links and
-closures. The minimum of the cuts is a parameter constrained by hypotheses
-rather than a computed value, because the carrier has joins but no meet
-over the powerset; those constraints are the profile conditions of the two
-rows.
+The cycle strength and each cut are joins, so they exist in any semiring.
+The minimum over all cuts need not, because the natural order has joins
+but not necessarily meets. The theorem therefore takes a cut-minimising
+set as a hypothesis rather than computing one. That hypothesis, and the
+strongest-cycle hypothesis of prudence, are the conditions on $M$ marked
+in the table for these two rows; over a total order the minimum of
+finitely many cuts always exists, so on Schulze's own semiring the
+hypothesis costs nothing.
 
 
+
+\subsection{The Outlier: Commutativity}\label{sec:outlier}
+
+One criterion does not fit the hierarchy at all. Reversing every ballot
+should turn the outcome upside down, and at the level of the beat relation
+that is what happens: reversal is transposition of $M$, and the closure
+commutes with it.
+
+\begin{theorem}[Reversal symmetry, relation level]\label{thm:reversal}
+Over a \emph{commutative} semiring, $a \succ_M b$ if and only if
+$b \succ_{M^{\mathsf{T}}} a$, where $M^{\mathsf{T}}_{ij} = M_{ji}$.
+\proofat{algorithm/ReversalsymmetryN.v}{reversal\_symmetry\_O}
+\end{theorem}
+
+\begin{proof}
+The closure of a transpose is the transpose of the closure,
+$(M^{\mathsf{T}})^{\ast}_{ab} = \Mstar_{ba}$, because a path from $a$ to
+$b$ in $M^{\mathsf{T}}$ is a path from $b$ to $a$ in $M$ read backwards
+and the two have the same strength. Commutativity is exactly what lets the
+product be read backwards. The comparison defining $\succ$ then swaps with
+it.
+\end{proof}
+
+Neither boundedness nor selectivity is used, so this sits outside the
+hierarchy rather than at a level of it: the axiom it uses is one no other
+criterion needs. It is not, however, an extra assumption in practice. By
+\Cref{lem:commfree} the meet property already forces commutativity, so any
+semiring that reaches Level 3 has it for free, and the same statement
+holds there with no commutativity hypothesis at all.
+\proofat{algorithm/ReversalsymmetryN.v}{reversal\_symmetry\_O\_level2}
+
+The winner-level forms of reversal symmetry, that a reversal displaces a
+winner exactly when it promotes a non-winner, and that the winner set is
+unchanged only when everything was tied, do need the full Level 3
+apparatus, which is why they appear there in \Cref{tab:classification}.
+\rocqrelated{\rocqfile{algorithm/ReversalsymmetryN.v}{reversal\_symmetry\_S}, and
+\rocqfile{algorithm/ReversalsymmetryN.v}{reversal\_\allowbreak symmetry\_all\_tied}}
 
 \section{The Top of the Hierarchy is Exact}\label{sec:characterisation}
 
-\Cref{thm:trans} says selectivity and the meet property suffice. This section
-shows they are necessary, so that the second block of
-the top level of \Cref{fig:hierarchy} is not a sufficient condition but a
-characterisation.
+\Cref{thm:trans} says selectivity and the meet property suffice for
+transitivity. This section shows they are necessary, so that the Level 3
+row of \Cref{tab:classification} states a characterisation rather than a
+sufficient condition. It then shows, with two concrete semirings, that
+each axiom is necessary on its own and that the cardinality bounds in the
+characterisations cannot be improved.
 
-We first record what the two axioms do to the carrier. They already force
+We first record what the two axioms do to the semiring. They already force
 multiplication to commute (\Cref{lem:commfree}), and in fact they pin both
 operations completely.
 
@@ -886,9 +928,10 @@ Right to left is \Cref{thm:trans}. For the converse, assume $\succ_M$ is
 transitive for every $M$ and fix three distinct alternatives $X, Y, Z$.
 
 Everything rests on one construction. For $p, q, r \in R$ let $T(p,q,r)$ be
-the matrix on $\{X,Y,Z\}$ with exactly three links, $X \to Y$ worth $p$,
-$Y \to Z$ worth $q$, and $Z \to X$ worth $r$, and $0$ everywhere else. The
-only route from $Y$ back to $X$ is $Y \to Z \to X$, worth $q \cdot r$, so
+the matrix on $\{X,Y,Z\}$ with exactly three links, $X \to Y$ of strength $p$,
+$Y \to Z$ of strength $q$, and $Z \to X$ of strength $r$, and $0$ everywhere
+else. The only route from $Y$ back to $X$ is $Y \to Z \to X$, of strength
+$q \cdot r$, so
 $q \cdot r < p$ makes $X \succ Y$; likewise $r \cdot p < q$ makes
 $Y \succ Z$. Transitivity then forces $X \succ Z$. But the only route from
 $X$ to $Z$ is $X \to Y \to Z$, so the closure entry $T^{\ast}_{XZ}$ is at
@@ -943,9 +986,9 @@ which is why the bound here is four and not three.
 $x \cdot y < y$ and $y \cdot x < x$: each product lies below both factors,
 and equality either way would make $x$ and $y$ comparable. Build the
 \emph{square} $S(x,y)$ on four alternatives $A, B, C, D$, with four links
-$B \to A$ and $D \to C$ worth $x$, and $A \to D$ and $C \to B$ worth $y$,
+$B \to A$ and $D \to C$ of strength $x$, and $A \to D$ and $C \to B$ of strength $y$,
 and $0$ elsewhere. Each alternative has exactly one route back to the one
-in front of it, and that route is worth $x\cdot y$ or $y \cdot x$, so it
+in front of it, and that route has strength $x\cdot y$ or $y \cdot x$, so it
 loses. The four beats close into a cycle, no alternative is unbeaten, and
 $\mathcal{S}(S(x,y)) = \emptyset$. So there is no incomparable pair.
 
@@ -958,13 +1001,10 @@ return routes, so its beat relation is a strict cycle and again no
 alternative wins.
 \end{proof}
 
-Four alternatives are needed, not merely convenient. Over the four-element
-diamond lattice, which has the meet property but is not selective, every
-matrix on three alternatives still has a winner; we check this by
-enumerating all $4^{9}$ of them. So no three-alternative witness can force
-selectivity, and the bound in \Cref{thm:winnerchar} is optimal.
+\Cref{sec:sharp} shows that four alternatives are needed here, not merely
+convenient.
 
-\begin{theorem}[Well-formed output]\label{thm:outputchar}
+\begin{corollary}[Well-formed output]\label{thm:outputchar}
 Let $R$ be a bounded semiring with decidable equality. For $|A| \geq 3$,
 $\succ_M$ is a strict partial order for every $M$, and Schulze's stated
 output, a strict partial order together with a non-empty winner set, is
@@ -972,23 +1012,23 @@ delivered for every $M$, if and only if $R$ is selective and has the meet
 property. For $|A| \geq 4$ the same holds of the property that every
 non-winner is beaten by some winner.
 \proofat{algorithm/CharacterisationsN.v}{output\_well\_formed\_\allowbreak characterisation}
-\end{theorem}
+\end{corollary}
 
 \begin{proof}
-Each is squeezed between the two characterisations already proved. A strict
-partial order is in particular transitive, so \Cref{thm:characterisation}
-gives the axioms from the first two, and three alternatives suffice because
-the transitivity component supplies the converse on its own. For the last,
-if every non-winner is beaten by a winner then a winner exists whenever some
-alternative is not one, and refuting it therefore means refuting winner
-existence; that needs the four alternatives of \Cref{thm:winnerchar}.
+A strict partial order is in particular transitive, so
+\Cref{thm:characterisation} gives the axioms from the first two
+properties, and three alternatives suffice because the transitivity
+component supplies the converse on its own. If every non-winner is beaten
+by a winner then a winner exists, so refuting the last property means
+refuting winner existence, which needs the four alternatives of
+\Cref{thm:winnerchar}.
 \end{proof}
 
 \begin{theorem}[Independence of clones]\label{thm:clonechar}
 Let $R$ be a bounded semiring with decidable equality and let $|A| \geq 5$.
 Then \Cref{thm:clones} holds for every clone replacement if and only if $R$
 is selective and has the meet property. Consequently independence of clones
-and winner existence are the same condition on the carrier.
+and winner existence are the same condition on the semiring.
 \proofat{algorithm/CloneCharacterisationN.v}{clone\_characterisation, clone\_iff\_winner\_exists}
 \end{theorem}
 
@@ -1006,9 +1046,10 @@ existence is then immediate, since both sides characterise the same pair of
 axioms.
 \end{proof}
 
-Independence of clones is the criterion Schulze's method is best known for,
-and in this setting it is not an extra demand at all: a carrier that always
-returns a winner is automatically clone-independent, and conversely.
+Independence of clones is the criterion Schulze's method is best known
+for, and in this setting it is not an extra demand at all: a semiring that
+always returns a winner is automatically clone-independent, and
+conversely.
 
 \begin{figure}[t]
 \centering
@@ -1045,182 +1086,131 @@ returns a winner is automatically clone-independent, and conversely.
     \node[capt] at (0,-2.15) {diamond: meet property,\\ not selective};
   \end{scope}
 \end{tikzpicture}
-\caption{The two witnesses. Left, over the tropical carrier, forward hops
+\caption{The two witnesses. Left, over the tropical semiring, forward hops
 cost $1$ and return hops $2$; the closure preserves the asymmetry, so the
 beats form a $3$-cycle and no alternative is unbeaten. Right, over the
 diamond, the incomparable pair $p, q$ alternates round four alternatives and
 again nobody is unbeaten, whereas at three alternatives the diamond always
-produces a winner. Each carrier drops exactly one Level 3 axiom, so neither
-axiom can be dropped in favour of the other.}
+produces a winner. Each semiring drops exactly one Level 3 axiom, so
+neither axiom can be dropped in favour of the other.}
 \label{fig:witnesses}
 \end{figure}
 
-\section{Sharpness}\label{sec:sharp}
+\subsection{Neither Axiom Can Be Dropped}\label{sec:sharp}
 
-The characterisations of \Cref{sec:classification} say that selectivity and
-the meet property are together necessary. They do not by themselves say that
-each is necessary on its own, nor that the cardinality bounds cannot be
-improved. This section settles both with concrete carriers, each small
-enough to check by hand and each checked by machine.
+The characterisations above say that selectivity and the meet property are
+together necessary. Two semirings, each dropping exactly one of the two
+axioms, show that each is necessary on its own and that the cardinality
+bounds are optimal. Both are small enough to check by hand and both are
+checked by machine.
 
-Two carriers do all the work, and they are chosen so that each drops exactly
-one of the two axioms.
-
-\subparagraph*{The tropical carrier: selective, no meet property.}
+\subparagraph*{The tropical semiring: selective, no meet property.}
 Take $\langle \mathbb{N}^{\infty}, \min, +\rangle$, the shortest-path
 semiring of \Cref{ex:tropical}. Its natural order is total, since $\min$
 always returns one of its arguments, so it is selective. It fails the meet
-property, and the smallest counterexample is the one already visible in the
-introduction: $1$ lies below $1$ twice over, but $1 \cdot 1 = 2$, and in the
-natural order of this carrier $2$ lies strictly below $1$ rather than above
-it. Multiplication is therefore a lower bound of its factors but not the
-greatest one.
-
-That is enough to break the method at three alternatives
-(\Cref{fig:witnesses}, left).
-\Cref{ex:tropical} exhibits the matrix: hops forward round a triangle cost
-$1$, hops back cost $2$, and the closure leaves the asymmetry untouched, so
-$a \succ b \succ c \succ a$ is a cycle of strict wins and no alternative is
-unbeaten. Selectivity alone therefore buys nothing at Level 3, and the meet
-property is genuinely needed.
+property: $1$ is a lower bound of $\{1, 1\}$, but $1 \cdot 1 = 2$ and in
+the natural order of this semiring $2$ lies strictly below $1$, so the
+product is a lower bound of its factors but not the greatest one. That is
+enough to break the method at three alternatives
+(\Cref{fig:witnesses}, left): hops forward round a triangle cost $1$ and
+hops back cost $2$, the closure leaves the asymmetry untouched, and
+$a \succ b \succ c \succ a$ is a cycle of strict wins with no unbeaten
+alternative. Selectivity alone therefore buys nothing at Level 3.
 \proofat{examples/SharpnessWitness.v}{tropical\_no\_winner\_at\_three}
 
 \subparagraph*{The diamond: meet property, not selective.}
-For the other direction take the four-element lattice
-$\Diam = \{\bot, p, q, \top\}$ in which $p$ and $q$ are incomparable, with
-join for addition and meet for multiplication. Multiplication is by
-construction the greatest lower bound, so the meet property holds. The
-carrier is not selective, because $p + q = \top$ is neither $p$ nor $q$;
-equivalently, $p$ and $q$ are two strengths that cannot be compared.
-
-Here the failure needs a fourth alternative, and that is not an artefact of
-how we searched. Over $\Diam$ \emph{every} matrix on three alternatives has
-a winner. There are $4^{9}$ such matrices, and we check all of them by
-evaluating a boolean winner test, proved sound against $\mathcal{S}$, on a
-tabulation of every one.
-\proofat{examples/SharpnessWitness.v}{diamond\_every\_profile\_has\_winner}
-
-At four alternatives the winner disappears (\Cref{fig:witnesses}, right).
-The square witness of
-\Cref{thm:winnerchar}, instantiated with the incomparable pair $p$ and $q$,
-gives a matrix whose beat relation runs round all four alternatives, so
-again nobody is unbeaten. The meet property alone therefore buys nothing
-either, selectivity is genuinely needed, and the bound of four in
-\Cref{thm:winnerchar} cannot be lowered to three.
-\proofat{examples/SharpnessWitness.v}{diamond\_no\_winner\_at\_four}
+Take the four-element lattice $\Diam = \{\bot, p, q, \top\}$ in which $p$
+and $q$ are incomparable, with join for addition and meet for
+multiplication. Multiplication is by construction the greatest lower
+bound, so the meet property holds, but $p + q = \top$ is neither $p$ nor
+$q$, so the semiring is not selective. The square of \Cref{thm:winnerchar},
+instantiated with $p$ and $q$, gives a matrix on four alternatives whose
+beat relation runs round all four (\Cref{fig:witnesses}, right), so again
+nobody is unbeaten, and the meet property alone buys nothing either.
+Three alternatives would not have sufficed: over $\Diam$ \emph{every}
+matrix on three alternatives has a winner. There are $4^{9}$ such
+matrices, and we check all of them by evaluating a boolean winner test,
+proved sound against $\mathcal{S}$, on each one. The bound of four in
+\Cref{thm:winnerchar} therefore cannot be lowered.
+\rocqrelated{\rocqfile{examples/SharpnessWitness.v}{diamond\_no\_winner\_at\_four} and
+\rocqfile{examples/SharpnessWitness.v}{diamond\_every\_profile\_has\_winner}}
 
 \subparagraph*{Level 2 is sharp as well.}
-The same diamond settles the level below. Boundedness and the meet property
-are not enough for any of the Level 2 criteria: over $\Diam$ we exhibit a
-matrix with a clean threshold separating a strong block from a weak one and
-a winner outside the strong block, so the Smith criterion fails; a matrix
-with a Condorcet winner that the closure does not elect; a matrix where an
-untied winner is not unique, so the resolution step fails; and matrices
-refuting both halves of Smith-IIA. Each is a small explicit table, and each
-failure is a direct consequence of two incomparable strengths, which is
-precisely what selectivity forbids.
+The same diamond settles the level below. Over $\Diam$ we exhibit a matrix
+with a clean threshold separating a strong block from a weak one and a
+winner outside the strong block, so the Smith criterion fails; a matrix
+with a Condorcet winner that the closure does not elect; a matrix in which
+an untied winner is not unique, so the resolution step fails; and
+matrices refuting both halves of Smith-IIA. Each is a small explicit
+table, and each failure comes from two incomparable strengths, which is
+precisely what selectivity forbids. So boundedness and the meet property
+together are not enough for any Level 2 criterion.
 \rocqrelated{\rocqfile{examples/SharpnessWitness.v}{smith\_fails\_over\_diamond},
 \rocqfile{examples/SharpnessWitness.v}{condorcet\_fails\_\allowbreak over\_diamond},
 \rocqfile{examples/SharpnessWitness.v}{resolution\_fails\_\allowbreak over\_diamond}, and
 \rocqfile{examples/SharpnessWitness.v}{smith\_iia\_fails\_\allowbreak over\_diamond}}
 
-Taken together the two carriers show that the hierarchy is not an artefact
-of how we happened to write the proofs. Drop selectivity and Level 2 and
-Level 3 both collapse; drop the meet property and Level 3 collapses; and the
-three alternatives that suffice for transitivity provably do not suffice for
-winner existence.
-
-
-
 \section{Formal Verification}\label{sec:formalisation}
 
 Mechanisation does more here than certify the proofs. The hierarchy of
 \Cref{sec:classification} is \emph{enforced} rather than asserted, because
-each theorem carries exactly the algebra its proof consumes and nothing
-else. Neutrality is stated over a bare semiring, so a proof of it cannot
-reach for boundedness; the Level 1 results are stated over a bounded
-semiring with no further hypothesis, so they cannot quietly appeal to
-selectivity; and selectivity and the meet property appear as explicit
-arguments of the theorems that need them. Where the paper claims an axiom
-is not required, that claim is checked by the type checker rather than by
-reading the proof and hoping.
+each theorem carries exactly the algebra its proof uses and nothing else.
+Neutrality is stated over a bare semiring, so a proof of it cannot reach
+for boundedness; the Level 1 results are stated over a bounded semiring
+with no further hypothesis, so they cannot quietly appeal to selectivity;
+and selectivity and the meet property appear as explicit arguments of the
+theorems that need them. Where the paper claims an axiom is not required,
+the type checker confirms it.
 
-The development is carried out in \rocq{}. It runs to some $20{,}000$ lines,
-nothing is admitted and no axiom is assumed, and the proofs are
+The development is carried out in \rocq{}. It runs to some $20{,}000$
+lines, nothing is admitted and no axiom is assumed, and the proofs are
 constructive, so the definitions extract to executable OCaml.
 
-\subparagraph*{Three base layers.}
+\subparagraph*{Three base files.}
 Every later file, and every example, is stated over three files.
 \rocqfile{algorithm/MatN.v}{MatN.v} builds the matrix semiring over an
-arbitrary carrier: a matrix is a function $A \times A \to R$, addition is
+arbitrary semiring: a matrix is a function $A \times A \to R$, addition is
 entrywise, multiplication is the usual $\sum_k M_{ik}\cdot N_{kj}$, and $I$
-carries $1$ on the diagonal. Everything about powers, the geometric sum, and
-their monotonicity lives here.
-\rocqfile{algorithm/PathN.v}{PathN.v} gives the concrete reading of the same
-objects. A path is an explicit list of links, its worth is the product of
-them, and \texttt{path\_star} joins the worths of all paths of length below
-$|A|$ that the enumeration produces. The two views are then identified:
-\[
-  \texttt{path\_star}\ M\ c\ d \;=\; \Mstar_{cd},
-\]
-so a statement proved about powers and geometric sums may be read back as a
-statement about walks, which is how the informal gloss of
-\Cref{sec:prelim} is discharged. The cycle lemmas of the same file are what
-justify stopping at $|A| - 1$: any longer walk repeats an alternative, and
-cutting the repetition out leaves a shorter walk that is at least as good.
-
-\rocqfile{algorithm/SemimoduleN.v}{SemimoduleN.v} supplies the action of a
-matrix on a vector and, with it, the reason the closure deserves the name
-Kleene star. It proves that $\Mstar b$ solves the linear system
-\[
-  x \;=\; M x + b,
-  \qquad
-  M : A \times A \to R,
-  \qquad
-  b, x : A \to U,
-\]
-that it is the \emph{least} such solution, and that under boundedness the
-solution is unique. The vectors are indexed by alternatives but need not
-take their values in $R$: it is enough that they lie in a semimodule $U$ on
-which $R$ acts, which is what the file is named for. These are the standard
-fixed-point facts of the algebraic path problem, and they hold here over an
-arbitrary bounded semiring. The same file proves the efficient form of the action
-agrees with its specification.
+carries $1$ on the diagonal. Everything about powers, the geometric sum,
+and their monotonicity lives here.
+\rocqfile{algorithm/PathN.v}{PathN.v} gives the concrete reading of the
+same objects. A path is an explicit list of links, its strength is the
+product of them, and \texttt{path\_star} joins the strengths of all paths
+of length below $|A|$. The two views are identified,
+$\texttt{path\_star}\ M\ c\ d = \Mstar_{cd}$, so a statement proved about
+powers may be read back as a statement about walks; this is how the gloss
+of \Cref{sec:prelim} is discharged, and the cycle lemmas of the same file
+are what justify stopping at $|A| - 1$.
+\rocqfile{algorithm/SemimoduleN.v}{SemimoduleN.v} proves the standard
+fixed-point facts of the algebraic path problem over an arbitrary bounded
+semiring: $\Mstar b$ is the least solution of $x = M x + b$, and under
+boundedness the unique one. This is what earns the closure the name
+Kleene star.
 \rocqrelated{\rocqfile{algorithm/SchulzeDefsN.v}{path\_star\_\allowbreak elements\_is\_mat\_star},
 \rocqfile{algorithm/SemimoduleN.v}{kleene\_fixed\_point},
 \rocqfile{algorithm/SemimoduleN.v}{kleene\_fixed\_\allowbreak point\_least}, and
 \rocqfile{algorithm/SemimoduleN.v}{kleene\_fixed\_\allowbreak point\_unique}}
 
-
-\subparagraph*{Matrices as functions, and why that is not enough.}
+\subparagraph*{Two representations of a matrix.}
 Taking a matrix to be a \emph{function} is what makes the theory pleasant:
 two matrices are equal when they agree at every pair, and no bookkeeping
 about lengths or well-formedness ever appears in a statement. It is also
-unusable as a program, because a function memoises nothing. 
-The development therefore carries a second, tabulated representation.
-\texttt{to\_list} writes a matrix out as a list of rows, \texttt{of\_list}
-reads one back, and \texttt{mul\_list} and \texttt{pow\_list} do the
-arithmetic on the tabulated form, where each entry is computed once and
-reused. Storing the entries is what the functional form could not do, and it
-is what makes squaring pay: a product of tabulated matrices costs
-$O(n^{3})$, and repeated squaring needs $O(\log k)$ of them, so the whole
-closure costs $O(n^{3}\log k)$. The two representations are then proved to agree:
-\[
-  \texttt{of\_list}\,(\texttt{pow\_list}\,(\texttt{to\_list}\ M)\ k)_{cd}
-  \;=\; (M^{k})_{cd} .
-\]
-So the statements quantify over functions, where they read cleanly, and the
-extracted program runs on lists, where it is fast, with a theorem saying the
-two never disagree. Nothing in the paper's development has to choose between
-them.
+unusable as a program, because a function memoises nothing. The
+development therefore carries a second, tabulated representation as a list
+of rows, on which \texttt{mul\_list} and \texttt{pow\_list} do the
+arithmetic with each entry computed once; repeated squaring then computes
+the closure in $O(n^{3}\log k)$. The two representations are proved to
+agree, $\texttt{of\_list}\,(\texttt{pow\_list}\,(\texttt{to\_list}\ M)\ k)_{cd}
+= (M^{k})_{cd}$, so the statements quantify over functions, where they read
+cleanly, and the extracted program runs on lists, where it is fast.
 \rocqrelated{\rocqfile{algorithm/MatN.v}{of\_list\_\allowbreak to\_list},
 \rocqfile{algorithm/MatN.v}{of\_list\_\allowbreak pow\_pos\_list}, and
 \rocqfile{algorithm/MatN.v}{pow\_fun\_\allowbreak powN\_fun\_eqv}}
 
 \subparagraph*{Instances.}
 Because every result is stated over an arbitrary semiring, an instance is
-just a carrier with its two operations and a proof of the axioms.
-\rocqfile{examples/Schulze.v}{Schulze.v} supplies the max-min carrier of
+just a set with its two operations and a proof of the axioms.
+\rocqfile{examples/Schulze.v}{Schulze.v} supplies the max-min semiring of
 \Cref{sec:intro} and runs Schulze's own worked example;
 \rocqfile{examples/Shortestpath.v}{Shortestpath.v} and
 \rocqfile{examples/WidestShortestPath.v}{Widest\-Shortest\-Path.v} give shortest
@@ -1230,16 +1220,16 @@ of the two that models routing across network slices. Each extracts to
 running OCaml.
 
 \subparagraph*{Beatpaths themselves, not just their strength.}
-One instance is worth describing, because it shows how little the
-construction depends on the numbers.
-\rocqfile{examples/Schulzepath.v}{Schulzepath.v} keeps the alternatives and
-the links but replaces the carrier by \emph{sets of paths}: an element is a
-set of edge sequences, addition is union, multiplication concatenates every
-path of the left set with every path of the right, $0$ is the empty set and
-$1$ the set containing only the empty path. These are the semiring axioms,
-so the same closure applies unchanged, and $\Mstar_{ab}$ is now the set of
-all beatpaths from $a$ to $b$. The strength is recovered afterwards, as the
-best measure of a path in that set.
+One instance shows how little the construction depends on the numbers.
+\rocqfile{examples/Schulzepath.v}{Schulzepath.v} keeps the alternatives
+and the links but replaces the semiring by \emph{sets of paths}: an
+element is a set of edge sequences, addition is union, multiplication
+concatenates every path of the left set with every path of the right, $0$
+is the empty set and $1$ the set containing only the empty path. These
+satisfy the semiring axioms, so the same closure applies unchanged, and
+$\Mstar_{ab}$ is now the set of all beatpaths from $a$ to $b$. The
+strength is recovered afterwards, as the best measure of a path in that
+set.
 
 
 \section{Related Work}\label{sec:related}
@@ -1258,9 +1248,12 @@ semirings are classical, going back to Cuninghame-Green's minimax
 algebra~\cite{cuninghamegreen1979minimax}. On the computational side,
 Sornat, Vassilevska Williams, and Xu~\cite{sornat2021schulze} give
 fine-grained bounds for computing Schulze winners via a reduction to
-all-pairs bottleneck paths; \Cref{thm:structure} explains why bottleneck
-paths are not one reduction among many but the only shape the problem can
-take.
+all-pairs bottleneck paths, and Csar, Lackner, and
+Pichler~\cite{csar2018computing} compute the method at scale in the Pregel
+model, again by working with bottleneck paths on the pairwise graph. Both
+take that structure as a convenient route to an algorithm;
+\Cref{thm:structure} explains why it is not one route among many but the
+only shape the problem can take.
 
 
 \subparagraph*{Algebraic conditions as the price of a guarantee.}
@@ -1288,33 +1281,39 @@ social choice side, formalisations of impossibility
 theorems~\cite{arrow1950difficulty,nipkow2009social} and verified vote counting, including for
 the Schulze method, are well
 established~\cite{10.1007/978-3-319-66107-0_26,ghale2018modular,10.1007/978-3-030-03592-1_5}.
-That work verifies a particular procedure at a fixed carrier. Our concern is
-complementary: it asks how much algebraic structure a property costs. 
+That work verifies a particular procedure over a fixed semiring. Closest to the
+present paper is Tiwari and Pattinson's machine-checked proof that a
+\rocq{} implementation of the Schulze method satisfies the Condorcet winner
+criterion~\cite{tiwari2021machine}, which leaves reversal symmetry, Pareto,
+monotonicity and the rest explicitly as future work. Our concern is
+complementary to all of it: rather than certifying one procedure against one
+criterion, we ask how much algebraic structure each criterion costs, and
+answer it for the whole family at once. 
 
 \section{Conclusion}\label{sec:conclusion}
 
-We set out to ask, for each of Schulze's guarantees, how much arithmetic its
-proof really needs. The answer is that the guarantees are not a flat list.
-Neutrality holds over any semiring at all. Weak Pareto and monotonicity need
-only that the empty path is unbeatable. The Smith criterion and Condorcet
-consistency need in addition that any two strengths are comparable. The
-guarantees that join two beatpaths end to end need one thing more, that the
-worth of a composite chain is the weaker of its halves.
+We set out to ask, for each of Schulze's guarantees, how much arithmetic
+its proof really needs, and the answer is that the guarantees are not a
+flat list. Neutrality holds over any semiring. Weak Pareto and
+monotonicity need only that the empty path is unbeatable. The Smith
+criterion and Condorcet consistency need in addition that any two
+strengths are comparable. The guarantees that join two beatpaths end to
+end need one thing more, that the strength of a composite path is the
+weaker of its halves.
 
 At the top the levels are not merely sufficient but exact. Transitivity of
 the outranking relation, existence of a winner, and independence of clones
-each hold for every profile precisely when the carrier is selective and has
-the meet property, and a carrier with those two properties is $\max$ and
-$\min$ on a total order. So the operations Schulze chose are not one
-reasonable choice among several. They are the only ones that work, and the
-only freedom left is the scale on which strengths are recorded. That
-independence of clones, the criterion the method is best known for, turns
-out to be the same condition on the carrier as the bare existence of a
-winner was not something we expected. The story however is not uniformly tidy. Several
-criteria carry conditions that no choice of carrier can supply, because they
-are conditions on the ballots rather than on the algebra; a separate ballot
-layer discharges those from Schulze's own premises. 
-
+each hold for every profile precisely when the semiring is selective and
+has the meet property, and a semiring with those two properties is $\max$
+and $\min$ on a total order. So the operations Schulze chose are the only
+ones that work, and the only freedom left is the scale on which strengths
+are recorded. We did not expect independence of clones, the criterion the
+method is best known for, to turn out to be the same condition on the
+semiring as the bare existence of a winner. The story is not uniformly
+tidy, however. Several criteria carry conditions that no choice of
+semiring can supply, because they are conditions on the ballots rather
+than on the algebra, and a separate ballot layer discharges those from
+Schulze's own premises.
 
 \bibliography{ref,icalp}
 
